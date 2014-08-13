@@ -128,3 +128,15 @@ TrainCalendar* calendar_get(uint8_t calendar_id) {
   load_calendars();
   return &s_calendars[calendar_id];
 }
+
+uint16_t current_minute(void) {
+  const time_t timestamp = time(NULL);
+  struct tm* t = localtime(&timestamp);
+  // Until 2am, consider it to be sometime after 24:00 yesterday.
+  if(t->tm_hour < 2) {
+    t->tm_hour += 24; // This may be a violation of the spec?
+    t->tm_wday = ((t->tm_wday + 6) % 7); // i.e. day -= 1
+  }
+  const uint16_t current_minute = t->tm_hour * 60 + t->tm_min;
+  return current_minute;
+}

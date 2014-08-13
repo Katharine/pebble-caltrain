@@ -53,3 +53,7 @@ bool trip_get(uint8_t trip_id, TrainTrip *trip);
 //! Produces a schedule entry.
 //! The system owns the returned pointer; do not free it.
 TrainCalendar* calendar_get(uint8_t calendar_id);
+
+//! Get the current minute number.
+uint16_t current_minute(void);
+
