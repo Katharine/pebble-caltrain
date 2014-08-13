@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include "model.h"
+#include "flash.h"
 
 static ResHandle s_stop_handle = NULL;
 static ResHandle s_stop_times_index_handle = NULL;
@@ -72,7 +73,7 @@ uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_t
   
   // First get the number of entries and the offset into the index file
   uint16_t stop_data[2];
-  resource_load_byte_range(h, 1 + 4*stop_id, (uint8_t *)&stop_data, 4);
+  flash_read_byte_range(h, 1 + 4*stop_id, (uint8_t *)&stop_data, 4);
   const uint16_t count = time_count < stop_data[1] ? time_count : stop_data[1];
   const uint16_t index_read_offset = stop_data[0];
   const uint32_t index_read_size = count * 2;
@@ -80,7 +81,7 @@ uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_t
   
   // Read the index
   uint16_t *time_indexes = malloc(index_read_size);
-  resource_load_byte_range(h, index_read_offset, (uint8_t *)time_indexes, index_read_size);
+  flash_read_byte_range(h, index_read_offset, (uint8_t *)time_indexes, index_read_size);
   
   // Fetch each time listed.
   for(int i = 0; i < count; ++i) {
@@ -97,7 +98,7 @@ uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_t
 }
 
 bool time_get(uint16_t time_id, TrainTime *time) {
-  return (resource_load_byte_range(get_time_handle(), 2 + time_id*sizeof(TrainTime), (uint8_t *)time, sizeof(TrainTime)) == sizeof(TrainTime));
+  return (flash_read_byte_range(get_time_handle(), 2 + time_id*sizeof(TrainTime), (uint8_t *)time, sizeof(TrainTime)) == sizeof(TrainTime));
 }
 
 bool trip_get(uint8_t trip_id, TrainTrip *trip) {

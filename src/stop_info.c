@@ -124,8 +124,6 @@ static void update_stop_ui(void) {
   next_train_at_station(s_stop_id, &s_northbound, &s_southbound);
   format_minutes(s_northbound.time, s_nb_time_text);
   format_minutes(s_southbound.time, s_sb_time_text);
-  APP_LOG(APP_LOG_LEVEL_INFO, "time North: %d; south: %d", s_northbound.time, s_southbound.time);
-  APP_LOG(APP_LOG_LEVEL_INFO, "s_nb_time_text: %s | s_sb_time_text: %s", s_nb_time_text, s_sb_time_text);
   text_layer_set_text(s_nb_next_time, s_nb_time_text);
   text_layer_set_text(s_sb_next_time, s_sb_time_text);
 }
