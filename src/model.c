@@ -42,7 +42,7 @@ static ResHandle get_trip_handle(void) {
 
 uint8_t stop_count(void) {
   if(s_stop_count == 0) {
-    resource_load_byte_range(get_stop_handle(), 0, &s_stop_count, 1);
+    flash_read_byte_range(get_stop_handle(), 0, &s_stop_count, 1);
   }
   return s_stop_count;
 }
@@ -52,7 +52,7 @@ bool stop_get(uint8_t stop_id, TrainStop *stop) {
     return false;
   }
   const uint32_t offset = 1 + (stop_id * sizeof(TrainStop));
-  return (resource_load_byte_range(get_stop_handle(), offset, (uint8_t *)stop, sizeof(TrainStop)) == sizeof(TrainStop));
+  return (flash_read_byte_range(get_stop_handle(), offset, (uint8_t *)stop, sizeof(TrainStop)) == sizeof(TrainStop));
 }
 
 uint16_t stop_times_count(uint8_t stop_id) {
@@ -60,7 +60,7 @@ uint16_t stop_times_count(uint8_t stop_id) {
     return 0;
   }
   uint16_t count;
-  resource_load_byte_range(get_stop_times_index_handle(), 1 + 4*stop_id + 2, (uint8_t *)&count, sizeof(count));
+  flash_read_byte_range(get_stop_times_index_handle(), 1 + 4*stop_id + 2, (uint8_t *)&count, sizeof(count));
   return count;
 }
 
@@ -105,9 +105,9 @@ bool trip_get(uint8_t trip_id, TrainTrip *trip) {
   // Instead of reading this every time, just read the whole thing in once and copy from RAM.
   if(s_trips == NULL) {
     uint16_t size;
-    resource_load_byte_range(get_trip_handle(), 0, (uint8_t *)&size, 2);
+    flash_read_byte_range(get_trip_handle(), 0, (uint8_t *)&size, 2);
     s_trips = malloc(size * sizeof(TrainTrip));
-    resource_load_byte_range(get_trip_handle(), 2, (uint8_t *)s_trips, size * sizeof(TrainTrip));
+    flash_read_byte_range(get_trip_handle(), 2, (uint8_t *)s_trips, size * sizeof(TrainTrip));
   }
   memcpy(trip, &s_trips[trip_id], sizeof(TrainTrip));
   return true;

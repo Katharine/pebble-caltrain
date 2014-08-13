@@ -1,8 +1,8 @@
 #include <pebble.h>
 #include "planning.h"
 
-TrainTime* find_next_train(uint8_t direction, int count, TrainTime *times) {
-  TrainTime *best = NULL;
+void find_next_train(int count, TrainTime *times, TrainTime **nb, TrainTime **sb) {
+  TrainTime *best[2] = {NULL, NULL};
   const time_t timestamp = time(NULL);
   struct tm* t = localtime(&timestamp);
   // Until 2am, consider it to be sometime after 24:00 yesterday.
@@ -19,11 +19,6 @@ TrainTime* find_next_train(uint8_t direction, int count, TrainTime *times) {
     trip_get(train_time->trip, &trip);
     //APP_LOG(APP_LOG_LEVEL_INFO, "%d) %p time: %d, stop: %d, direction: %d", i, train_time, train_time->time, train_time->stop, trip.direction);
     
-    // Make sure we're going in the right direction.
-    if(trip.direction != direction) {
-      continue;
-    }
-    
     // Make sure this trip is actually running today
     TrainCalendar *cal = calendar_get(trip.service);
     if((cal->days & day) == 0 || cal->start > timestamp || cal->end < timestamp) {
@@ -32,14 +27,15 @@ TrainTime* find_next_train(uint8_t direction, int count, TrainTime *times) {
     
     // If it's better than the best we have so far, use it.
     if(train_time->time > current_minute) {
-      if(best == NULL || train_time->time < best->time) {
-        best = train_time;
+      if(best[trip.direction] == NULL || train_time->time < best[trip.direction]->time) {
+        best[trip.direction] = train_time;
       }
     }
   }
   int time_taken = time(NULL) - start;
   APP_LOG(APP_LOG_LEVEL_DEBUG_VERBOSE, "Scanning took %d seconds.", time_taken);
-  return best;
+  *nb = best[TrainDirectionNorthbound];
+  *sb = best[TrainDirectionSouthbound];
 }
 
 void next_train_at_station(uint8_t station, TrainTime *northbound, TrainTime *southbound) {
@@ -47,8 +43,8 @@ void next_train_at_station(uint8_t station, TrainTime *northbound, TrainTime *so
   TrainTime *times = malloc(time_count * sizeof(TrainTime));
   time_count = stop_get_times(station, time_count, times);
   
-  TrainTime *north = find_next_train(TrainDirectionNorthbound, time_count, times);
-  TrainTime *south = find_next_train(TrainDirectionSouthbound, time_count, times);
+  TrainTime *north, *south;
+  find_next_train(time_count, times, &north, &south);
   
   memcpy(northbound, north, sizeof(TrainTime));
   memcpy(southbound, south, sizeof(TrainTime));
