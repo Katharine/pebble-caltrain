@@ -1,5 +1,10 @@
 #pragma once
 
+typedef enum {
+  TrainDirectionSouthbound,
+  TrainDirectionNorthbound,
+} TrainDirection;
+  
 // uint8_t header
 typedef struct {
   uint8_t zone;
@@ -36,3 +41,15 @@ uint8_t stop_count(void);
 
 //! Produces a stop.
 bool stop_get(uint8_t stop_id, TrainStop *stop);
+
+uint16_t stop_times_count(uint8_t stop_id);
+uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_times);
+
+bool time_get(uint16_t time_id, TrainTime *time);
+
+//! Produces a trip.
+bool trip_get(uint8_t trip_id, TrainTrip *trip);
+
+//! Produces a schedule entry.
+//! The system owns the returned pointer; do not free it.
+TrainCalendar* calendar_get(uint8_t calendar_id);

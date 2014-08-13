@@ -2,6 +2,7 @@
 #include <pebble.h>
 
 #include "model.h"
+#include "stop_info.h"
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -39,12 +40,17 @@ static uint16_t get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_ind
   return stop_count();
 }
 
+static void handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
+  show_stop_info(cell_index->row);
+}
+
 void show_stop_list(void) {
   initialise_ui();
   
   menu_layer_set_callbacks(s_menu, NULL, (MenuLayerCallbacks){
     .draw_row = draw_menu_row,
-    .get_num_rows = get_menu_rows
+    .get_num_rows = get_menu_rows,
+    .select_click = handle_menu_click,
   });
   
   window_set_window_handlers(s_window, (WindowHandlers) {
