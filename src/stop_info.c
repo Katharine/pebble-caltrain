@@ -160,27 +160,48 @@ static void format_state(TrainTime *train_time, size_t n, char* buffer) {
 }
 
 static void update_states(void) {
-  format_state(&s_northbound, sizeof(s_nb_state_text), s_nb_state_text);
-  format_state(&s_southbound, sizeof(s_sb_state_text), s_sb_state_text);
-  text_layer_set_text(s_nb_status, s_nb_state_text);
-  text_layer_set_text(s_sb_status, s_sb_state_text);
+  if(s_northbound.time == INVALID_TIME) {
+    text_layer_set_text(s_nb_status, "No trains.");
+  } else {
+    format_state(&s_northbound, sizeof(s_nb_state_text), s_nb_state_text);
+    text_layer_set_text(s_nb_status, s_nb_state_text);
+  }
+  
+  if(s_southbound.time == INVALID_TIME) {
+    text_layer_set_text(s_sb_status, "No trains.");
+  } else {
+    format_state(&s_southbound, sizeof(s_sb_state_text), s_sb_state_text);
+    text_layer_set_text(s_sb_status, s_sb_state_text);
+  }
 }
 
 static void update_stop_ui(void) {
-  next_train_at_station(s_stop_id, &s_northbound, &s_southbound);
   text_layer_set_text(s_station_name, s_stop.name);
-  format_minutes(s_northbound.time, s_nb_time_text);
-  format_minutes(s_southbound.time, s_sb_time_text);
-  text_layer_set_text(s_nb_next_time, s_nb_time_text);
-  text_layer_set_text(s_sb_next_time, s_sb_time_text);
   
+  next_train_at_station(s_stop_id, &s_northbound, &s_southbound);
   TrainTrip nb_trip, sb_trip;
-  trip_get(s_northbound.trip, &nb_trip);
-  trip_get(s_southbound.trip, &sb_trip);
-  snprintf(s_nb_number_text, sizeof(s_nb_number_text), "%d", nb_trip.trip_name);
-  snprintf(s_sb_number_text, sizeof(s_sb_number_text), "%d", sb_trip.trip_name);
-  text_layer_set_text(s_nb_number, s_nb_number_text);
-  text_layer_set_text(s_sb_number, s_sb_number_text);
+  
+  if(s_northbound.time == INVALID_TIME) {
+    text_layer_set_text(s_nb_next_time, "--:--");
+    text_layer_set_text(s_nb_number, "---");
+  } else {
+    format_minutes(s_northbound.time, s_nb_time_text);
+    text_layer_set_text(s_nb_next_time, s_nb_time_text);
+    trip_get(s_northbound.trip, &nb_trip);
+    snprintf(s_nb_number_text, sizeof(s_nb_number_text), "%d", nb_trip.trip_name);
+    text_layer_set_text(s_nb_number, s_nb_number_text);
+  }
+  
+  if(s_southbound.time == INVALID_TIME) {
+    text_layer_set_text(s_sb_next_time, "--:--");
+    text_layer_set_text(s_sb_number, "---");
+  } else {
+    format_minutes(s_southbound.time, s_sb_time_text);
+    text_layer_set_text(s_sb_next_time, s_sb_time_text);
+    trip_get(s_southbound.trip, &sb_trip);
+    snprintf(s_sb_number_text, sizeof(s_sb_number_text), "%d", sb_trip.trip_name);
+    text_layer_set_text(s_sb_number, s_sb_number_text);
+  }
   
   update_states();
 }

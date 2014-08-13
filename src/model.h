@@ -1,5 +1,7 @@
 #pragma once
 
+#define INVALID_TIME 65535
+  
 typedef enum {
   TrainDirectionSouthbound,
   TrainDirectionNorthbound,

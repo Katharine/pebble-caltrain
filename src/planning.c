@@ -46,8 +46,16 @@ void next_train_at_station(uint8_t station, TrainTime *northbound, TrainTime *so
   TrainTime *north, *south;
   find_next_train(time_count, times, &north, &south);
   
-  memcpy(northbound, north, sizeof(TrainTime));
-  memcpy(southbound, south, sizeof(TrainTime));
+  if(north != NULL) {
+    memcpy(northbound, north, sizeof(TrainTime));
+  } else {
+    northbound->time = INVALID_TIME;
+  }
+  if(south != NULL) {
+    memcpy(southbound, south, sizeof(TrainTime));
+  } else {
+    southbound->time = INVALID_TIME;
+  }
   
   free(times);
 }
