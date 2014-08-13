@@ -3,6 +3,7 @@
 
 #include "model.h"
 #include "planning.h"
+#include "persist.h"
 
 static uint8_t s_stop_id;
 static TrainStop s_stop;
@@ -138,6 +139,7 @@ static void destroy_ui(void) {
 
 static void handle_window_unload(Window* window) {
   destroy_ui();
+  persist_hiding_stop();
 }
 
 static void format_minutes(uint16_t minutes, char* buffer) {
@@ -205,6 +207,7 @@ void show_stop_info(uint8_t stop_id) {
     .unload = handle_window_unload,
   });
   window_stack_push(s_window, true);
+  persist_showing_stop(stop_id);
 }
 
 void hide_stop_info(void) {

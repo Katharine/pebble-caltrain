@@ -3,6 +3,7 @@
 
 #include "model.h"
 #include "stop_info.h"
+#include "persist.h"
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -25,6 +26,7 @@ static void destroy_ui(void) {
 // END AUTO-GENERATED UI CODE
 
 static void handle_window_unload(Window* window) {
+  persist_selected_stop(menu_layer_get_selected_index(s_menu).row);
   destroy_ui();
 }
 
@@ -42,6 +44,13 @@ static uint16_t get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_ind
 
 static void handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
   show_stop_info(cell_index->row);
+}
+
+void select_list_select_stop(uint8_t stop_id, bool show_window) {
+  menu_layer_set_selected_index(s_menu, (MenuIndex){.section=0, .row=stop_id}, MenuRowAlignCenter, false);
+  if(show_window) {
+    show_stop_info(stop_id);
+  }
 }
 
 void show_stop_list(void) {
