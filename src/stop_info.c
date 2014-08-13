@@ -219,6 +219,7 @@ void show_stop_info(uint8_t stop_id) {
   if(!stop_get(stop_id, &s_stop)) {
     return;
   }
+  hide_stop_info(); // this avoids a potential race condition.
   s_stop_id = stop_id;
   initialise_ui();
   update_stop_ui();

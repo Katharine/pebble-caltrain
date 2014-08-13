@@ -1,7 +1,11 @@
 {
-    "appKeys": {},
+    "appKeys": {
+        "COMMAND_ID": 1,
+        "POS_LAT": 3,
+        "POS_LON": 2
+    },
     "capabilities": [
-        ""
+        "location"
     ],
     "companyName": "Katharine",
     "longName": "CalTrain",
