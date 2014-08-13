@@ -138,6 +138,7 @@ static void destroy_ui(void) {
 // END AUTO-GENERATED UI CODE
 
 static void handle_window_unload(Window* window) {
+  tick_timer_service_unsubscribe();
   destroy_ui();
   persist_hiding_stop();
 }
