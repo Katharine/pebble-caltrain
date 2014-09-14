@@ -101,7 +101,7 @@ bool time_get(uint16_t time_id, TrainTime *time) {
   return (flash_read_byte_range(get_time_handle(), 2 + time_id*sizeof(TrainTime), (uint8_t *)time, sizeof(TrainTime)) == sizeof(TrainTime));
 }
 
-bool trip_get(uint8_t trip_id, TrainTrip *trip) {
+bool trip_get(uint16_t trip_id, TrainTrip *trip) {
   // Instead of reading this every time, just read the whole thing in once and copy from RAM.
   if(s_trips == NULL) {
     uint16_t size;

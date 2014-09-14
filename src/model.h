@@ -50,7 +50,7 @@ uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_t
 bool time_get(uint16_t time_id, TrainTime *time);
 
 //! Produces a trip.
-bool trip_get(uint8_t trip_id, TrainTrip *trip);
+bool trip_get(uint16_t trip_id, TrainTrip *trip);
 
 //! Produces a schedule entry.
 //! The system owns the returned pointer; do not free it.

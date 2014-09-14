@@ -8,7 +8,7 @@
         "location"
     ],
     "companyName": "Katharine",
-    "longName": "CalTrain",
+    "longName": "Caltrain",
     "projectType": "native",
     "resources": {
         "media": [
@@ -45,7 +45,7 @@
             }
         ]
     },
-    "shortName": "CalTrain",
+    "shortName": "Caltrain",
     "uuid": "40df227e-4715-4369-82ca-ec9de58889ea",
     "versionCode": 1,
     "versionLabel": "1.1",
