@@ -25,12 +25,12 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
-static void handle_window_unload(Window* window) {
+static void prv_handle_window_unload(Window* window) {
   persist_selected_stop(menu_layer_get_selected_index(s_menu).row);
   destroy_ui();
 }
 
-static void draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
+static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
   TrainStop stop;
   stop_get(cell_index->row, &stop);
   char zone[] = "zone 50";
@@ -38,11 +38,11 @@ static void draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cel
   menu_cell_basic_draw(ctx, cell_layer, stop.name, zone, NULL);
 }
 
-static uint16_t get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
+static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
   return stop_count();
 }
 
-static void handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
+static void prv_handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
   show_stop_info(cell_index->row);
 }
 
@@ -87,13 +87,13 @@ void show_stop_list(void) {
   initialise_ui();
   
   menu_layer_set_callbacks(s_menu, NULL, (MenuLayerCallbacks){
-    .draw_row = draw_menu_row,
-    .get_num_rows = get_menu_rows,
-    .select_click = handle_menu_click,
+    .draw_row = prv_draw_menu_row,
+    .get_num_rows = prv_get_menu_rows,
+    .select_click = prv_handle_menu_click,
   });
   
   window_set_window_handlers(s_window, (WindowHandlers) {
-    .unload = handle_window_unload,
+    .unload = prv_handle_window_unload,
   });
   window_stack_push(s_window, true);
 }

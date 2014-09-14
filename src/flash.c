@@ -6,7 +6,7 @@ static uint8_t s_buffer[4096];
 static uint32_t s_offset = 0;
 static uint32_t s_length = 0;
 
-static void reload_cache(ResHandle h, uint32_t start_offset) {
+static void prv_reload_cache(ResHandle h, uint32_t start_offset) {
   s_handle = h;
   s_offset = start_offset;
   size_t res_size = resource_size(h);
@@ -30,7 +30,7 @@ size_t flash_read_byte_range(ResHandle h, uint32_t start_offset, uint8_t *buffer
   }
   // If we can't fill the request, refill our cache
   if(s_handle == NULL || s_handle != h || start_offset < s_offset || start_offset + num_bytes > s_offset + s_length) {
-    reload_cache(h, start_offset);
+    prv_reload_cache(h, start_offset);
   }
   
   size_t bytes_available = s_length - (start_offset - s_offset);

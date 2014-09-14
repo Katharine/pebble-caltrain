@@ -12,28 +12,28 @@ static uint8_t s_stop_count = 0;
 
 static TrainTrip *s_trips = NULL;
 
-static ResHandle get_stop_handle(void) {
+static ResHandle prv_get_stop_handle(void) {
   if(s_stop_handle == NULL) {
     s_stop_handle = resource_get_handle(RESOURCE_ID_DATA_STOPS);
   }
   return s_stop_handle;
 }
 
-static ResHandle get_stop_times_index_handle(void) {
+static ResHandle prv_get_stop_times_index_handle(void) {
   if(s_stop_times_index_handle == NULL) {
     s_stop_times_index_handle = resource_get_handle(RESOURCE_ID_INDEX_STOP_TIMES);
   }
   return s_stop_times_index_handle;
 }
 
-static ResHandle get_time_handle(void) {
+static ResHandle prv_get_time_handle(void) {
   if(s_time_handle == NULL) {
     s_time_handle = resource_get_handle(RESOURCE_ID_DATA_TIMES);
   }
   return s_time_handle;
 }
 
-static ResHandle get_trip_handle(void) {
+static ResHandle prv_get_trip_handle(void) {
   if(s_trip_handle == NULL) {
     s_trip_handle = resource_get_handle(RESOURCE_ID_DATA_TRIPS);
   }
@@ -42,7 +42,7 @@ static ResHandle get_trip_handle(void) {
 
 uint8_t stop_count(void) {
   if(s_stop_count == 0) {
-    flash_read_byte_range(get_stop_handle(), 0, &s_stop_count, 1);
+    flash_read_byte_range(prv_get_stop_handle(), 0, &s_stop_count, 1);
   }
   return s_stop_count;
 }
@@ -52,7 +52,7 @@ bool stop_get(uint8_t stop_id, TrainStop *stop) {
     return false;
   }
   const uint32_t offset = 1 + (stop_id * sizeof(TrainStop));
-  return (flash_read_byte_range(get_stop_handle(), offset, (uint8_t *)stop, sizeof(TrainStop)) == sizeof(TrainStop));
+  return (flash_read_byte_range(prv_get_stop_handle(), offset, (uint8_t *)stop, sizeof(TrainStop)) == sizeof(TrainStop));
 }
 
 uint16_t stop_times_count(uint8_t stop_id) {
@@ -60,7 +60,7 @@ uint16_t stop_times_count(uint8_t stop_id) {
     return 0;
   }
   uint16_t count;
-  flash_read_byte_range(get_stop_times_index_handle(), 1 + 4*stop_id + 2, (uint8_t *)&count, sizeof(count));
+  flash_read_byte_range(prv_get_stop_times_index_handle(), 1 + 4*stop_id + 2, (uint8_t *)&count, sizeof(count));
   return count;
 }
 
@@ -69,7 +69,7 @@ uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_t
     return 0;
   }
   time_t start = time(NULL);
-  ResHandle h = get_stop_times_index_handle();
+  ResHandle h = prv_get_stop_times_index_handle();
   
   // First get the number of entries and the offset into the index file
   uint16_t stop_data[2];
@@ -98,16 +98,16 @@ uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_t
 }
 
 bool time_get(uint16_t time_id, TrainTime *time) {
-  return (flash_read_byte_range(get_time_handle(), 2 + time_id*sizeof(TrainTime), (uint8_t *)time, sizeof(TrainTime)) == sizeof(TrainTime));
+  return (flash_read_byte_range(prv_get_time_handle(), 2 + time_id*sizeof(TrainTime), (uint8_t *)time, sizeof(TrainTime)) == sizeof(TrainTime));
 }
 
 bool trip_get(uint16_t trip_id, TrainTrip *trip) {
   // Instead of reading this every time, just read the whole thing in once and copy from RAM.
   if(s_trips == NULL) {
     uint16_t size;
-    flash_read_byte_range(get_trip_handle(), 0, (uint8_t *)&size, 2);
+    flash_read_byte_range(prv_get_trip_handle(), 0, (uint8_t *)&size, 2);
     s_trips = malloc(size * sizeof(TrainTrip));
-    flash_read_byte_range(get_trip_handle(), 2, (uint8_t *)s_trips, size * sizeof(TrainTrip));
+    flash_read_byte_range(prv_get_trip_handle(), 2, (uint8_t *)s_trips, size * sizeof(TrainTrip));
   }
   memcpy(trip, &s_trips[trip_id], sizeof(TrainTrip));
   return true;
