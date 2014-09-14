@@ -51,7 +51,7 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
-static void prv_init_custom_ui() {
+static void prv_init_custom_ui(void) {
   s_nb_layer = next_train_layer_create(GRect(0, 14, 144, 71), "NB");
   s_sb_layer = next_train_layer_create(GRect(0, 80, 144, 71), "SB");
   
@@ -59,7 +59,7 @@ static void prv_init_custom_ui() {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_sb_layer);
 }
 
-static void prv_destroy_custom_ui() {
+static void prv_destroy_custom_ui(void) {
   next_train_layer_destroy(s_nb_layer);
   next_train_layer_destroy(s_sb_layer);
 }
