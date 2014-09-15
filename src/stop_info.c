@@ -5,6 +5,7 @@
 #include "planning.h"
 #include "persist.h"
 #include "next_train_layer.h"
+#include "train_times_list.h"
 
 static uint8_t s_stop_id;
 static TrainStop s_stop;
@@ -90,6 +91,19 @@ static void prv_handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   }
 }
 
+static void prv_handle_up_click(ClickRecognizerRef recognizer, void *context) {
+  show_train_times_list(s_stop_id, TrainDirectionNorthbound);
+}
+
+static void prv_handle_down_click(ClickRecognizerRef recognizer, void *context) {
+  show_train_times_list(s_stop_id, TrainDirectionSouthbound);
+}
+
+static void prv_click_config_provider(void *context) {
+  window_single_click_subscribe(BUTTON_ID_UP, prv_handle_up_click);
+  window_single_click_subscribe(BUTTON_ID_DOWN, prv_handle_down_click);
+}
+
 void show_stop_info(uint8_t stop_id) {
   if(!stop_get(stop_id, &s_stop)) {
     return;
@@ -105,6 +119,7 @@ void show_stop_info(uint8_t stop_id) {
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = prv_handle_window_unload,
   });
+  window_set_click_config_provider(s_window, prv_click_config_provider);
   window_stack_push(s_window, true);
   persist_showing_stop(stop_id);
 }

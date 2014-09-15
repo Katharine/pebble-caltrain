@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "next_train_layer.h"
 #include "model.h"
+#include "time_utils.h"
 
 typedef struct {
   TextLayer *direction_layer;
@@ -12,29 +13,12 @@ typedef struct {
   char state_text[13];
 } NextTrainLayerData;
 
-static void prv_format_minutes(uint16_t minutes, size_t n, char* buffer) {
-  minutes = minutes % (60 * 24);
-  snprintf(buffer, n, "%02d:%02d", (int)(minutes / 60), (int)(minutes % 60));
-}
-
-static void prv_format_state(TrainTime *train_time, size_t n, char* buffer) {
-  uint16_t now = current_minute();
-  int16_t diff = train_time->time - now;
-  if(diff > 0) {
-    snprintf(buffer, n, "%d min", diff);
-  } else if(diff == 0) {
-    strncpy(buffer, "Now", n);
-  } else {
-    strncpy(buffer, "", n);
-  }
-}
-
 static void prv_update_states(NextTrainLayer *layer, TrainTime *time) {
   NextTrainLayerData *data = layer_get_data(layer);
   if(time->time == INVALID_TIME) {
     text_layer_set_text(data->state_layer, "No trains.");
   } else {
-    prv_format_state(time, sizeof(data->state_text), data->state_text);
+    train_time_format_state(time, sizeof(data->state_text), data->state_text);
     text_layer_set_text(data->state_layer, data->state_text);
   }
 }
@@ -85,7 +69,7 @@ void next_train_layer_set_time(NextTrainLayer *layer, TrainTime *time) {
     text_layer_set_text(data->time_layer, "--:--");
     text_layer_set_text(data->number_layer, "---");
   } else {
-    prv_format_minutes(time->time, sizeof(data->time_text), data->time_text);
+    train_time_format_minutes(time->time, sizeof(data->time_text), data->time_text);
     text_layer_set_text(data->time_layer, data->time_text);
     trip_get(time->trip, &trip);
     snprintf(data->number_text, sizeof(data->number_text), "%d", trip.trip_name);

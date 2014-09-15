@@ -59,3 +59,5 @@ TrainCalendar* calendar_get(uint8_t calendar_id);
 //! Get the current minute number.
 uint16_t current_minute(void);
 
+//! Get the current day mask.
+uint8_t current_day(void);
