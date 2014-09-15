@@ -88,19 +88,19 @@ def generate_files(source_dir, target_dir):
 
     times_txt = list(csv.DictReader(open("%s/stop_times.txt" % source_dir)))
 
-    tm = [{
+    tm = sorted([{
         'time': (int(x['arrival_time'].split(':')[0])*60 + int(x['arrival_time'].split(':')[1])),
         'stop': stop_map[int(x['stop_id'])],
         'sequence': int(x['stop_sequence']),
         'trip': tr_map[x['trip_id']]
-    } for x in times_txt]
+    } for x in times_txt], key=lambda y: y['time'])
 
     with open('%s/times.dat' % target_dir, 'wb') as f:
         f.write(struct.pack('<H', len(tm)))
         for t in tm:
             f.write(struct.pack('<HHBB', t['trip'], t['time'], t['stop'], t['sequence']))
 
-    stop_times = {stop: [i for i, x in enumerate(tm) if x['stop'] == stop] for stop, s in enumerate(stops)}
+    stop_times = {stop: sorted([i for i, x in enumerate(tm) if x['stop'] == stop], key=lambda t: tm[t]['time']) for stop, s in enumerate(stops)}
     lengths = [len(x) for x in stop_times.values()]
 
     with open('%s/stop_index.dat' % target_dir, 'wb') as f:
