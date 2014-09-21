@@ -34,11 +34,9 @@ void persist_selected_stop(uint8_t stop_id) {
 }
 
 void restore_state() {
+  memset(&s_state, 0, sizeof(s_state));
   if(persist_exists(STATE_PERSIST_KEY)) {
     persist_read_data(STATE_PERSIST_KEY, &s_state, sizeof(s_state));
     select_list_select_stop(s_state.stop_id, s_state.window_open);
-  } else {
-    s_state.stop_id = 0;
-    s_state.window_open = false;
   }
 }
