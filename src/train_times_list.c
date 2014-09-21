@@ -3,6 +3,7 @@
 #include "model.h"
 #include "planning.h"
 #include "time_utils.h"
+#include "trip_stop_list.h"
 
 static TrainDirection s_direction;
 static uint8_t s_stop_id;
@@ -92,7 +93,8 @@ static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section
 }
 
 static void prv_handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
-//   show_stop_info(cell_index->row);
+  const TrainTime *time = &s_times[cell_index->row];
+  show_trip_stop_list(time->trip, time->sequence);
 }
 
 static int16_t prv_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {

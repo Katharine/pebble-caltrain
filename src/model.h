@@ -47,6 +47,9 @@ bool stop_get(uint8_t stop_id, TrainStop *stop);
 uint16_t stop_times_count(uint8_t stop_id);
 uint16_t stop_get_times(uint8_t stop_id, uint16_t time_count, TrainTime *train_times);
 
+uint8_t trip_times_count(uint16_t trip_id);
+uint8_t trip_get_times(uint16_t trip_id, uint8_t stop_count, TrainTime *trip_stops);
+
 bool time_get(uint16_t time_id, TrainTime *time);
 
 //! Produces a trip.

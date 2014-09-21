@@ -13,6 +13,11 @@
     "resources": {
         "media": [
             {
+                "file": "data/trip_index.dat",
+                "name": "INDEX_TRIP_STOPS",
+                "type": "raw"
+            },
+            {
                 "file": "images/caltrain-icon.png",
                 "menuIcon": true,
                 "name": "IMAGE_MENU_ICON",
