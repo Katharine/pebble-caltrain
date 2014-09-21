@@ -114,5 +114,27 @@ def generate_files(source_dir, target_dir):
             for x in s:
                 f.write(struct.pack('<H', x))
 
+
+    trip_stops = [[i for i, x in enumerate(tm) if x['trip'] == trip] for trip, s in enumerate(tr)]
+    lengths = map(len, trip_stops)
+    with open('%s/trip_index.dat' % target_dir, 'wb') as f:
+        f.write(struct.pack('<H', len(lengths)))
+        counter = len(lengths) * 3 + 2
+        data_start = counter
+        for l in lengths:
+            f.write(struct.pack('<HB', counter, l))
+            counter += l*2
+
+        if data_start != f.tell():
+            raise Exception("%d != %d" % (counter, f.tell()))
+
+        for s in trip_stops:
+            for x in s:
+                f.write(struct.pack('<H', x))
+
+        if f.tell() != counter:
+            raise Exception("Not the expected length!")
+
+
 if __name__ == "__main__":
     generate_files("/Users/katharine/Downloads/GTFS Caltrain Devs/", "/Users/katharine/projects/pebble-caltrain/resources/data/")
