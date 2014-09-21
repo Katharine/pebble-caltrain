@@ -5,6 +5,7 @@
 
 static uint16_t s_trip_id;
 static TrainTrip s_trip;
+static uint8_t s_index;
 static uint8_t s_sequence;
 static TrainTime *s_times;
 static uint8_t s_time_count;
@@ -62,6 +63,14 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
+static uint8_t prv_sequence_to_index(uint8_t sequence) {
+  if(s_trip.direction == TrainDirectionSouthbound) {
+    return sequence - 1;
+  } else {
+    return s_time_count - sequence;
+  }
+}
+
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
   char time_buf[17];
   char minutes_buf[6];
@@ -73,7 +82,7 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   stop_get(time->stop, &stop);
   snprintf(zone_buf, sizeof(zone_buf), "Zone %d", stop.zone);
   train_time_format_minutes(time->time, sizeof(minutes_buf), minutes_buf);
-  int16_t time_diff = time->time - s_times[s_sequence].time;
+  int16_t time_diff = time->time - s_times[s_index].time;
   if(time_diff > 0) {
     snprintf(time_buf, sizeof(time_buf), "%s (%d min)", minutes_buf, time_diff);
   } else {
@@ -91,30 +100,45 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   const bool is_end = (cell_index->row == s_time_count - 1);
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  if(cell_index->row < s_sequence) {
+  if(time->sequence < s_sequence) {
     int16_t top = 0;
+    int16_t bottom = 40;
     if(is_start) {
       top = 20;
+    } else if(is_end) {
+      bottom = 20;
     }
-    graphics_draw_line(ctx, GPoint(3, top), GPoint(3, 40));
-    graphics_draw_line(ctx, GPoint(9, top), GPoint(9, 40));
+    graphics_draw_line(ctx, GPoint(3, top), GPoint(3, bottom));
+    graphics_draw_line(ctx, GPoint(9, top), GPoint(9, bottom));
     graphics_context_set_fill_color(ctx, GColorWhite);
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
     graphics_draw_circle(ctx, GPoint(6, 20), 6);
-  } else if(cell_index->row > s_sequence) {
+  } else if(time->sequence > s_sequence) {
     GRect rect = GRect(3, 0, 7, 40);
     if(is_end) {
       rect.size.h = 20;
+    } else if(is_start) {
+      rect.size.h = 20;
+      rect.origin.y = 20;
     }
     graphics_fill_rect(ctx, rect, 0, GCornerNone);
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
   } else {
     if(!is_start) {
-      graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 20));
-      graphics_draw_line(ctx, GPoint(9, 0), GPoint(9, 20));
+      if(s_trip.direction == TrainDirectionSouthbound) {
+        graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 20));
+        graphics_draw_line(ctx, GPoint(9, 0), GPoint(9, 20));
+      } else {
+        graphics_fill_rect(ctx, GRect(3, 0, 7, 20), 0, GCornerNone);
+      }
     }
     if(!is_end) {
-      graphics_fill_rect(ctx, GRect(3, 20, 7, 20), 0, GCornerNone);
+      if(s_trip.direction == TrainDirectionSouthbound) {
+        graphics_fill_rect(ctx, GRect(3, 20, 7, 20), 0, GCornerNone);
+      } else {
+        graphics_draw_line(ctx, GPoint(3, 20), GPoint(3, 50));
+        graphics_draw_line(ctx, GPoint(9, 20), GPoint(9, 50));
+      }
     }
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
   }
@@ -129,9 +153,15 @@ static int16_t prv_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell
 }
 
 static void prv_init_custom_ui(uint16_t trip_id, uint8_t sequence) {
+  s_time_count = trip_times_count(trip_id);
   s_trip_id = trip_id;
-  s_sequence = sequence - 1;
   trip_get(trip_id, &s_trip);
+  s_index = prv_sequence_to_index(sequence);
+  s_sequence = sequence;
+  s_times = malloc(s_time_count * sizeof(TrainTime));
+  trip_get_times(trip_id, s_time_count, s_times);
+  
+  APP_LOG(APP_LOG_LEVEL_INFO, "Showing stop list for trip #%d (seq. %d, index %d) in direction %d", (int)s_trip_id, (int)s_sequence, (int)s_index, (int)s_trip.direction);
   snprintf(s_trip_name_buf, sizeof(s_trip_name_buf), "#%d", s_trip.trip_name);
   text_layer_set_text(s_train_number, s_trip_name_buf);
 
@@ -143,12 +173,6 @@ static void prv_init_custom_ui(uint16_t trip_id, uint8_t sequence) {
   };
   text_layer_set_text(s_train_type, trip_types[s_trip.route]);
   
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Available memory: %u bytes", (unsigned int)heap_bytes_free());
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Trip ID: %u", (unsigned int)trip_id);
-  s_time_count = trip_times_count(trip_id);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Stop count: %u", (unsigned int)s_time_count);
-  s_times = malloc(s_time_count * sizeof(TrainTime));
-  trip_get_times(trip_id, s_time_count, s_times);
   
   // Set up the menu layer
   menu_layer_set_callbacks(s_stop_list, NULL, (MenuLayerCallbacks) {
@@ -156,7 +180,8 @@ static void prv_init_custom_ui(uint16_t trip_id, uint8_t sequence) {
     .get_num_rows = prv_get_menu_rows,
     .get_cell_height = prv_get_cell_height,
   });
-  menu_layer_set_selected_index(s_stop_list, (MenuIndex){0,s_sequence}, MenuRowAlignTop, false);
+  const MenuRowAlign align = s_trip.direction == TrainDirectionSouthbound ? MenuRowAlignTop : MenuRowAlignBottom;
+  menu_layer_set_selected_index(s_stop_list, (MenuIndex){0, s_index}, align, false);
 }
 
 static void prv_destroy_custom_ui(void) {
