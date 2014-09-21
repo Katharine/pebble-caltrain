@@ -86,22 +86,36 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   graphics_draw_text(ctx, zone_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(14, 16, 129, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(14, 16, 129, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
   
+  // Draw in map thing in the margin.
+  const bool is_start = (cell_index->row == 0);
+  const bool is_end = (cell_index->row == s_time_count - 1);
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  // Draw in map thing in the margin.
   if(cell_index->row < s_sequence) {
-    graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 40));
-    graphics_draw_line(ctx, GPoint(9, 0), GPoint(9, 40));
+    int16_t top = 0;
+    if(is_start) {
+      top = 20;
+    }
+    graphics_draw_line(ctx, GPoint(3, top), GPoint(3, 40));
+    graphics_draw_line(ctx, GPoint(9, top), GPoint(9, 40));
     graphics_context_set_fill_color(ctx, GColorWhite);
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
     graphics_draw_circle(ctx, GPoint(6, 20), 6);
   } else if(cell_index->row > s_sequence) {
-    graphics_fill_rect(ctx, GRect(3, 0, 7, 40), 0, GCornerNone);
+    GRect rect = GRect(3, 0, 7, 40);
+    if(is_end) {
+      rect.size.h = 20;
+    }
+    graphics_fill_rect(ctx, rect, 0, GCornerNone);
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
   } else {
-    graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 20));
-    graphics_draw_line(ctx, GPoint(9, 0), GPoint(9, 20));
-    graphics_fill_rect(ctx, GRect(3, 20, 7, 20), 0, GCornerNone);
+    if(!is_start) {
+      graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 20));
+      graphics_draw_line(ctx, GPoint(9, 0), GPoint(9, 20));
+    }
+    if(!is_end) {
+      graphics_fill_rect(ctx, GRect(3, 20, 7, 20), 0, GCornerNone);
+    }
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
   }
 }
