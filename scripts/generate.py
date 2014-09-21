@@ -115,7 +115,7 @@ def generate_files(source_dir, target_dir):
                 f.write(struct.pack('<H', x))
 
 
-    trip_stops = [[i for i, x in enumerate(tm) if x['trip'] == trip] for trip, s in enumerate(tr)]
+    trip_stops = [sorted([i for i, x in enumerate(tm) if x['trip'] == trip], key=lambda k: tm[k]['stop']) for trip, s in enumerate(tr)]
     lengths = map(len, trip_stops)
     with open('%s/trip_index.dat' % target_dir, 'wb') as f:
         f.write(struct.pack('<H', len(lengths)))
