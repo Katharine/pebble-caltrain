@@ -66,6 +66,7 @@ void show_nearest_stop(int32_t lon, int32_t lat) {
   }
   APP_LOG(APP_LOG_LEVEL_INFO, "Finding closest stop to %d, %d", (int)lon, (int)lat);
   uint8_t count = stop_count();
+  // Linear search to find the closest station, because that's good enough at this scale.
   uint32_t best_dist = 4294967295;
   uint8_t best_id = 255;
   for(uint8_t i = 0; i < count; ++i) {

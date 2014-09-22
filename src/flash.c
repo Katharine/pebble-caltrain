@@ -6,6 +6,7 @@ static uint8_t s_buffer[4096];
 static uint32_t s_offset = 0;
 static uint32_t s_length = 0;
 
+// Fills our in-memory cache of the resource starting at the given offset.
 static void prv_reload_cache(ResHandle h, uint32_t start_offset) {
   s_handle = h;
   s_offset = start_offset;
@@ -24,9 +25,8 @@ static void prv_reload_cache(ResHandle h, uint32_t start_offset) {
 }
 
 size_t flash_read_byte_range(ResHandle h, uint32_t start_offset, uint8_t *buffer, size_t num_bytes) {
-  //APP_LOG(APP_LOG_LEVEL_DEBUG_VERBOSE, "flash_read_byte_range(%p, 0x%u, %p, %u)", h, (unsigned int)start_offset, buffer, (unsigned int)num_bytes);
   // Don't bother for large chunks.
-  if(num_bytes > 4096) {
+  if(num_bytes > sizeof(s_buffer)) {
     return resource_load_byte_range(h, start_offset, buffer, num_bytes);
   }
   // If we can't fill the request, refill our cache

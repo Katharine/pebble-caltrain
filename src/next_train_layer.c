@@ -13,6 +13,7 @@ typedef struct {
   char state_text[13];
 } NextTrainLayerData;
 
+// Updates the state layer given the TrainTime of the next train.
 static void prv_update_states(NextTrainLayer *layer, TrainTime *time) {
   NextTrainLayerData *data = layer_get_data(layer);
   if(time->time == INVALID_TIME) {

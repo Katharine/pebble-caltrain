@@ -95,14 +95,15 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   graphics_draw_text(ctx, zone_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(14, 16, 129, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(14, 16, 129, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
   
-  // Draw in map thing in the margin.
+  // Draw in map thing in the left margin.
   const bool is_start = (cell_index->row == 0);
   const bool is_end = (cell_index->row == s_time_count - 1);
   graphics_context_set_fill_color(ctx, GColorBlack);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  if(time->sequence < s_sequence) {
+  if(time->sequence < s_sequence) { // Empty section because the train has already gone past here.
     int16_t top = 0;
     int16_t bottom = 40;
+    // Avoid drawing past either end.
     if(is_start) {
       top = 20;
     } else if(is_end) {
@@ -111,10 +112,11 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
     graphics_draw_line(ctx, GPoint(3, top), GPoint(3, bottom));
     graphics_draw_line(ctx, GPoint(9, top), GPoint(9, bottom));
     graphics_context_set_fill_color(ctx, GColorWhite);
-    graphics_fill_circle(ctx, GPoint(6, 20), 6);
+    graphics_fill_circle(ctx, GPoint(6, 20), 6); // Fill white and draw black outline to avoid intersecting tracks.
     graphics_draw_circle(ctx, GPoint(6, 20), 6);
-  } else if(time->sequence > s_sequence) {
+  } else if(time->sequence > s_sequence) { // Filled section; we haven't gone here yet.
     GRect rect = GRect(3, 0, 7, 40);
+    // Avoid drawing past either end.
     if(is_end) {
       rect.size.h = 20;
     } else if(is_start) {
@@ -123,7 +125,8 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
     }
     graphics_fill_rect(ctx, rect, 0, GCornerNone);
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
-  } else {
+  } else { // Half-filled; we're here, and heading in one direction.
+           // Which direction we fill depends on which direction we're going in.
     if(!is_start) {
       if(s_trip.direction == TrainDirectionSouthbound) {
         graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 20));
@@ -161,7 +164,6 @@ static void prv_init_custom_ui(uint16_t trip_id, uint8_t sequence) {
   s_times = malloc(s_time_count * sizeof(TrainTime));
   trip_get_times(trip_id, s_time_count, s_times);
   
-  APP_LOG(APP_LOG_LEVEL_INFO, "Showing stop list for trip #%d (seq. %d, index %d) in direction %d", (int)s_trip_id, (int)s_sequence, (int)s_index, (int)s_trip.direction);
   snprintf(s_trip_name_buf, sizeof(s_trip_name_buf), "#%d", s_trip.trip_name);
   text_layer_set_text(s_train_number, s_trip_name_buf);
 

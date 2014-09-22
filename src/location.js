@@ -1,3 +1,4 @@
+// Converts the lon/lat coordinates into integers for consumption by the app
 function cleanCoordinate(coord) {
   return (coord * 1000000)|0;
 }

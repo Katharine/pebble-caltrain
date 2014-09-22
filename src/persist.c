@@ -11,6 +11,7 @@ typedef struct {
 
 static AppState s_state;
 
+// Actually write the state to persistent storage.
 static void prv_persist_state(void) {
   persist_write_data(STATE_PERSIST_KEY, &s_state, sizeof(s_state));
 }
