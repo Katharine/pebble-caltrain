@@ -13,6 +13,8 @@ Pebble.addEventListener('ready', function() {
         POS_LAT: cleanCoordinate(pos.coords.latitude)
       });
       console.log("Sent coordinates (" + pos.coords.longitude + ", " + pos.coords.latitude + ")");
+    }, function error(err) {
+      console.log('ERROR(' + err.code + '): ' + err.message);
     }, {
       timeout: 10000,
       maximumAge: 600000
