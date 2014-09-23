@@ -34,7 +34,7 @@ def build(ctx):
     ctx.path.make_node('src/js/').mkdir()
     js_paths = [node.abspath() for node in ctx.path.ant_glob("src/*.js")]
     if js_paths:
-        ctx.exec_command(['cat'] + js_paths, stdout=open('src/js/pebble-js-app.js', 'a'))
+        ctx.exec_command(['cat'] + js_paths, stdout=open('src/js/pebble-js-app.js', 'w'))
 
     ctx.load('pebble_sdk')
 
