@@ -56,7 +56,7 @@ void select_list_select_stop(uint8_t stop_id, bool show_window) {
 static uint32_t prv_dist_sq(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
   int32_t lon_diff = lon1 - lon2;
   int32_t lat_diff = lat1 - lat2;
-  return lon_diff * lon_diff + lat_diff * lat_diff;
+  return abs(lon_diff) + abs(lat_diff);
 }
 
 void show_nearest_stop(int32_t lon, int32_t lat) {
