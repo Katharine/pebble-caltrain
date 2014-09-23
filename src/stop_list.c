@@ -53,9 +53,9 @@ void select_list_select_stop(uint8_t stop_id, bool show_window) {
   }
 }
 
-static uint32_t prv_dist_sq(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
-  int32_t lon_diff = lon1 - lon2;
-  int32_t lat_diff = lat1 - lat2;
+static uint64_t prv_dist_sq(int32_t lon1, int32_t lat1, int32_t lon2, int32_t lat2) {
+  int64_t lon_diff = lon1 - lon2;
+  int64_t lat_diff = lat1 - lat2;
   return lon_diff * lon_diff + lat_diff * lat_diff;
 }
 
@@ -67,7 +67,7 @@ void show_nearest_stop(int32_t lon, int32_t lat) {
   APP_LOG(APP_LOG_LEVEL_INFO, "Finding closest stop to %d, %d", (int)lon, (int)lat);
   uint8_t count = stop_count();
   // Linear search to find the closest station, because that's good enough at this scale.
-  uint32_t best_dist = 4294967295;
+  uint64_t best_dist = 18446744073709551615U; // that's 2^64-1, if you don't have that memorised.
   uint8_t best_id = 255;
   for(uint8_t i = 0; i < count; ++i) {
     TrainStop stop;
