@@ -1,6 +1,6 @@
 #pragma once
 
-#define INVALID_TIME 65535
+#define INVALID_TIME UINT16_MAX
 
 // Indicates which direction a train is going in.
 typedef enum {
