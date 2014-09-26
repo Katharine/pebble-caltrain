@@ -72,13 +72,13 @@ void show_nearest_stop(int32_t lon, int32_t lat) {
   for(uint8_t i = 0; i < count; ++i) {
     TrainStop stop;
     stop_get(i, &stop);
-    uint32_t dist = prv_dist_sq(lon, lat, stop.lon, stop.lat);
+    uint64_t dist = prv_dist_sq(lon, lat, stop.lon, stop.lat);
     if(dist < best_dist) {
       best_dist = dist;
       best_id = i;
     }
   }
-  if(best_id == 255) {
+  if(best_id == UINT8_MAX) {
     return;
   }
   select_list_select_stop(best_id, true);
