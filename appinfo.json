@@ -13,28 +13,8 @@
     "resources": {
         "media": [
             {
-                "file": "data/calendar.dat",
-                "name": "DATA_CALENDAR",
-                "type": "raw"
-            },
-            {
-                "file": "data/stops.dat",
-                "name": "DATA_STOPS",
-                "type": "raw"
-            },
-            {
-                "file": "data/trips.dat",
-                "name": "DATA_TRIPS",
-                "type": "raw"
-            },
-            {
-                "file": "data/times.dat",
-                "name": "DATA_TIMES",
-                "type": "raw"
-            },
-            {
-                "file": "data/stop_index.dat",
-                "name": "INDEX_STOP_TIMES",
+                "file": "data/trip_index.dat",
+                "name": "INDEX_TRIP_STOPS",
                 "type": "raw"
             },
             {
@@ -44,8 +24,28 @@
                 "type": "png"
             },
             {
-                "file": "data/trip_index.dat",
-                "name": "INDEX_TRIP_STOPS",
+                "file": "data/stop_index.dat",
+                "name": "INDEX_STOP_TIMES",
+                "type": "raw"
+            },
+            {
+                "file": "data/times.dat",
+                "name": "DATA_TIMES",
+                "type": "raw"
+            },
+            {
+                "file": "data/trips.dat",
+                "name": "DATA_TRIPS",
+                "type": "raw"
+            },
+            {
+                "file": "data/stops.dat",
+                "name": "DATA_STOPS",
+                "type": "raw"
+            },
+            {
+                "file": "data/calendar.dat",
+                "name": "DATA_CALENDAR",
                 "type": "raw"
             }
         ]
