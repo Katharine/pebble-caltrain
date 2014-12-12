@@ -100,8 +100,8 @@ def generate_files(source_dir, target_dir):
         for t in tm:
             f.write(struct.pack('<HHBB', t['trip'], t['time'], t['stop'], t['sequence']))
 
-    stop_times = {stop: sorted([i for i, x in enumerate(tm) if x['stop'] == stop], key=lambda t: tm[t]['time']) for stop, s in enumerate(stops)}
-    lengths = [len(x) for x in stop_times.values()]
+    stop_times = [sorted([i for i, x in enumerate(tm) if x['stop'] == stop], key=lambda t: tm[t]['time']) for stop, s in enumerate(stops)]
+    lengths = [len(x) for x in stop_times]
 
     with open('%s/stop_index.dat' % target_dir, 'wb') as f:
         f.write(struct.pack('<B', len(lengths)))
@@ -110,7 +110,7 @@ def generate_files(source_dir, target_dir):
             f.write(struct.pack('<HH', counter, l))
             counter += l*2
 
-        for s in stop_times.values():
+        for s in stop_times:
             for x in s:
                 f.write(struct.pack('<H', x))
 
