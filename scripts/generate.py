@@ -83,7 +83,7 @@ def generate_files(source_dir, target_dir):
 
     for i, trip in enumerate(trips_txt):
         tr.append({
-            'direction': int(not int(trip['direction_id'])),  # We picked opposing values for north/south.
+            'direction': int(trip['direction_id']),
             'route': route_map[trip['route_id']],
             'service': cal_map[trip['service_id']],
             'trip_name': int(trip['trip_short_name'])}),

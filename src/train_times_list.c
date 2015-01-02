@@ -13,7 +13,7 @@ static TrainStop s_stop;
 static TrainTime *s_times;
 static uint16_t s_time_count;
 
-static const char *s_direction_names[2] = {"Southbound", "Northbound"};
+static const char *s_direction_names[2] = {"Northbound", "Southbound"};
 
 #ifdef PBL_ROUND
 static StatusBarLayer *s_status_bar;
