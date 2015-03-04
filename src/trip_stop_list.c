@@ -3,6 +3,7 @@
 #include "model.h"
 #include "time_utils.h"
 #include "colours.h"
+#include "menu_hacks.h"
 
 static uint16_t s_trip_id;
 static TrainTrip s_trip;
@@ -53,6 +54,12 @@ static void initialise_ui(void) {
   
   // s_stop_list
   s_stop_list = menu_layer_create(GRect(0, 21, 144, 131));
+  #ifdef PBL_COLOR
+  menu_hack_disable_inversion(s_stop_list);
+  #endif
+  if(watch_info_get_firmware_version().major >= 3) {
+    scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_stop_list), true);
+  }
   menu_layer_set_click_config_onto_window(s_stop_list, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_list);
 }
@@ -74,7 +81,7 @@ static uint8_t prv_sequence_to_index(uint8_t sequence) {
   }
 }
 
-static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
+static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
   char time_buf[17];
   char minutes_buf[6];
   char zone_buf[7];
@@ -92,8 +99,10 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
     strncpy(time_buf, minutes_buf, sizeof(time_buf));
   }
   
-  graphics_context_set_text_color(ctx, GColorBlack);
-  graphics_context_set_fill_color(ctx, GColorClear);
+  menu_hack_set_colours(ctx, menu, cell_index);
+  
+  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
+  
   graphics_draw_text(ctx, stop.name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(13, -7, 131, 29), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, zone_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(14, 16, 129, 20), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(14, 16, 129, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
@@ -113,8 +122,8 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
       bottom = 20;
     }
     graphics_context_set_fill_color(ctx, COLOUR_ROUTE_EMPTY);
-    graphics_fill_rect(ctx, GRect(3, top, 6, bottom - top), 0, GCornerNone);
-    graphics_draw_rect(ctx, GRect(3, top, 6, bottom - top));
+    graphics_fill_rect(ctx, GRect(3, top, 7, bottom - top), 0, GCornerNone);
+    graphics_draw_rect(ctx, GRect(3, top, 7, bottom - top));
     graphics_fill_circle(ctx, GPoint(6, 20), 6); // Fill white and draw black outline to avoid intersecting tracks.
     graphics_draw_circle(ctx, GPoint(6, 20), 6);
   } else if(time->sequence > s_sequence) { // Filled section; we haven't gone here yet.
@@ -184,10 +193,11 @@ static void prv_init_custom_ui(uint16_t trip_id, uint8_t sequence) {
   
   
   // Set up the menu layer
-  menu_layer_set_callbacks(s_stop_list, NULL, (MenuLayerCallbacks) {
+  menu_layer_set_callbacks(s_stop_list, s_stop_list, (MenuLayerCallbacks) {
     .draw_row = prv_draw_menu_row,
     .get_num_rows = prv_get_menu_rows,
     .get_cell_height = prv_get_cell_height,
+    .get_separator_height = menu_hack_borderless_cells,
   });
   const MenuRowAlign align = s_trip.direction == TrainDirectionSouthbound ? MenuRowAlignTop : MenuRowAlignBottom;
   menu_layer_set_selected_index(s_stop_list, (MenuIndex){0, s_index}, align, false);

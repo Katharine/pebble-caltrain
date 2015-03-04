@@ -5,6 +5,10 @@
   #define COLOUR_HEADER GColorRed
   #define COLOUR_HEADER_TEXT GColorWhite
   #define COLOUR_WINDOW GColorWhite
+  #define COLOUR_MENU_BACKGROUND GColorWhite
+  #define COLOUR_MENU_FOREGROUND GColorBlack
+  #define COLOUR_MENU_HIGHLIGHT_BACKGROUND GColorFromHEX(0xE31837)
+  #define COLOUR_MENU_HIGHLIGHT_FOREGROUND GColorWhite
   
   #define COLOUR_BULLET GColorFromHEX(0xE31837)
   #define COLOUR_LIMITED GColorChromeYellow
@@ -18,6 +22,10 @@
   #define COLOUR_HEADER GColorBlack
   #define COLOUR_HEADER_TEXT GColorWhite
   #define COLOUR_WINDOW GColorWhite
+  #define COLOUR_MENU_BACKGROUND GColorWhite
+  #define COLOUR_MENU_FOREGROUND GColorBlack
+  #define COLOUR_MENU_HIGHLIGHT_BACKGROUND GColorBlack
+  #define COLOUR_MENU_HIGHLIGHT_FOREGROUND GColorWhite
   
   #define COLOUR_ROUTE_OUTLINE GColorBlack
   #define COLOUR_ROUTE_FILLED GColorBlack

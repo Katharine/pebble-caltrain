@@ -5,6 +5,7 @@
 #include "time_utils.h"
 #include "trip_stop_list.h"
 #include "colours.h"
+#include "menu_hacks.h"
 
 static TrainDirection s_direction;
 static uint8_t s_stop_id;
@@ -54,6 +55,12 @@ static void initialise_ui(void) {
   
   // s_train_menu
   s_train_menu = menu_layer_create(GRect(0, 35, 144, 117));
+  #ifdef PBL_COLOR
+  menu_hack_disable_inversion(s_train_menu);
+  #endif
+  if(watch_info_get_firmware_version().major >= 3) {
+    scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_train_menu), true);
+  }
   menu_layer_set_click_config_onto_window(s_train_menu, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_train_menu);
 }
@@ -72,7 +79,7 @@ static void prv_handle_window_unload(Window* window) {
   free(s_times);
 }
 
-static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *callback_context) {
+static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
   char time_buf[6];
   char state_buf[13];
   char number_buf[4];
@@ -85,13 +92,15 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   train_time_format_minutes(time->time, sizeof(time_buf), time_buf);
   train_time_format_state(time, sizeof(state_buf), state_buf);
   
-  graphics_context_set_text_color(ctx, GColorBlack);
+  menu_hack_set_colours(ctx, menu, cell_index);
+  
+  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), GRect(0, -5, 114, 43), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-  graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(114, -4, 27, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+  graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(114, -6, 27, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
   
   #ifdef PBL_COLOR
     graphics_context_set_fill_color(ctx, trip_get_colour(&trip));
-    graphics_fill_circle(ctx, GPoint(135, 28), 5);
+    graphics_fill_circle(ctx, GPoint(135, 26), 5);
   #endif
 }
 
@@ -111,11 +120,12 @@ static int16_t prv_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell
 }
 
 static void prv_init_custom_ui(void) {
-  menu_layer_set_callbacks(s_train_menu, NULL, (MenuLayerCallbacks) {
+  menu_layer_set_callbacks(s_train_menu, s_train_menu, (MenuLayerCallbacks) {
     .draw_row = prv_draw_menu_row,
     .get_num_rows = prv_get_menu_rows,
     .select_click = prv_handle_menu_click,
     .get_cell_height = prv_get_cell_height,
+    .get_separator_height = menu_hack_borderless_cells,
   });
   stop_get(s_stop_id, &s_stop);
   text_layer_set_text(s_stop_name_layer, s_stop.name);
