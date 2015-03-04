@@ -1,8 +1,15 @@
 #include <pebble.h>
 #include "flash.h"
 
+// Take advantage of extra space on snowy.
+#ifdef PBL_PLATFORM_BASALT
+  #define BUFFER_SIZE 8192
+#else
+  #define BUFFER_SIZE 4096
+#endif
+
 static ResHandle s_handle = NULL;
-static uint8_t s_buffer[4096];
+static uint8_t s_buffer[BUFFER_SIZE];
 static uint32_t s_offset = 0;
 static uint32_t s_length = 0;
 

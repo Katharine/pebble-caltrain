@@ -4,6 +4,7 @@
 #include "model.h"
 #include "stop_info.h"
 #include "persist.h"
+#include "colours.h"
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -12,6 +13,7 @@ static MenuLayer *s_menu;
 static void initialise_ui(void) {
   s_window = window_create();
   window_set_fullscreen(s_window, false);
+  window_set_background_color(s_window, COLOUR_WINDOW);
   
   // s_menu
   s_menu = menu_layer_create(GRect(0, 0, 144, 152));

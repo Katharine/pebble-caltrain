@@ -2,6 +2,7 @@
 #include <pebble.h>
 #include "model.h"
 #include "time_utils.h"
+#include "colours.h"
 
 static uint16_t s_trip_id;
 static TrainTrip s_trip;
@@ -16,7 +17,7 @@ static char s_trip_name_buf[5];
 static Window *s_window;
 static GFont s_res_gothic_24_bold;
 static GFont s_res_gothic_24;
-static InverterLayer *s_statusbar;
+static TextLayer *s_statusbar;
 static TextLayer *s_train_number;
 static TextLayer *s_train_type;
 static MenuLayer *s_stop_list;
@@ -24,17 +25,19 @@ static MenuLayer *s_stop_list;
 static void initialise_ui(void) {
   s_window = window_create();
   window_set_fullscreen(s_window, false);
+  window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   s_res_gothic_24 = fonts_get_system_font(FONT_KEY_GOTHIC_24);
   // s_statusbar
-  s_statusbar = inverter_layer_create(GRect(0, 0, 144, 21));
+  s_statusbar = text_layer_create(GRect(0, 0, 144, 21));
+  text_layer_set_background_color(s_statusbar, COLOUR_HEADER);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_statusbar);
   
   // s_train_number
   s_train_number = text_layer_create(GRect(2, -7, 56, 29));
   text_layer_set_background_color(s_train_number, GColorClear);
-  text_layer_set_text_color(s_train_number, GColorWhite);
+  text_layer_set_text_color(s_train_number, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_train_number, "#307");
   text_layer_set_font(s_train_number, s_res_gothic_24_bold);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_train_number);
@@ -42,7 +45,7 @@ static void initialise_ui(void) {
   // s_train_type
   s_train_type = text_layer_create(GRect(62, -7, 80, 28));
   text_layer_set_background_color(s_train_type, GColorClear);
-  text_layer_set_text_color(s_train_type, GColorWhite);
+  text_layer_set_text_color(s_train_type, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_train_type, "Something");
   text_layer_set_text_alignment(s_train_type, GTextAlignmentRight);
   text_layer_set_font(s_train_type, s_res_gothic_24);
@@ -56,7 +59,7 @@ static void initialise_ui(void) {
 
 static void destroy_ui(void) {
   window_destroy(s_window);
-  inverter_layer_destroy(s_statusbar);
+  text_layer_destroy(s_statusbar);
   text_layer_destroy(s_train_number);
   text_layer_destroy(s_train_type);
   menu_layer_destroy(s_stop_list);
@@ -98,29 +101,29 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   // Draw in map thing in the left margin.
   const bool is_start = (cell_index->row == 0);
   const bool is_end = (cell_index->row == s_time_count - 1);
-  graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_context_set_stroke_color(ctx, GColorBlack);
+  graphics_context_set_fill_color(ctx, COLOUR_ROUTE_FILLED);
+  graphics_context_set_stroke_color(ctx, COLOUR_ROUTE_OUTLINE);
   if(time->sequence < s_sequence) { // Empty section because the train has already gone past here.
-    int16_t top = 0;
-    int16_t bottom = 40;
+    int16_t top = -1;
+    int16_t bottom = 41;
     // Avoid drawing past either end.
     if(is_start) {
       top = 20;
     } else if(is_end) {
       bottom = 20;
     }
-    graphics_draw_line(ctx, GPoint(3, top), GPoint(3, bottom));
-    graphics_draw_line(ctx, GPoint(9, top), GPoint(9, bottom));
-    graphics_context_set_fill_color(ctx, GColorWhite);
+    graphics_context_set_fill_color(ctx, COLOUR_ROUTE_EMPTY);
+    graphics_fill_rect(ctx, GRect(3, top, 6, bottom - top), 0, GCornerNone);
+    graphics_draw_rect(ctx, GRect(3, top, 6, bottom - top));
     graphics_fill_circle(ctx, GPoint(6, 20), 6); // Fill white and draw black outline to avoid intersecting tracks.
     graphics_draw_circle(ctx, GPoint(6, 20), 6);
   } else if(time->sequence > s_sequence) { // Filled section; we haven't gone here yet.
-    GRect rect = GRect(3, 0, 7, 40);
+    GRect rect = GRect(3, -1, 7, 41);
     // Avoid drawing past either end.
     if(is_end) {
-      rect.size.h = 20;
+      rect.size.h = 21;
     } else if(is_start) {
-      rect.size.h = 20;
+      rect.size.h = 21;
       rect.origin.y = 20;
     }
     graphics_fill_rect(ctx, rect, 0, GCornerNone);
@@ -129,21 +132,25 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
            // Which direction we fill depends on which direction we're going in.
     if(!is_start) {
       if(s_trip.direction == TrainDirectionSouthbound) {
-        graphics_draw_line(ctx, GPoint(3, 0), GPoint(3, 20));
-        graphics_draw_line(ctx, GPoint(9, 0), GPoint(9, 20));
+        graphics_context_set_fill_color(ctx, COLOUR_ROUTE_EMPTY);
       } else {
-        graphics_fill_rect(ctx, GRect(3, 0, 7, 20), 0, GCornerNone);
+        graphics_context_set_fill_color(ctx, COLOUR_ROUTE_FILLED);
       }
+      graphics_fill_rect(ctx, GRect(3, -1, 7, 21), 0, GCornerNone);
+      graphics_draw_rect(ctx, GRect(3, -1, 7, 21));
     }
     if(!is_end) {
       if(s_trip.direction == TrainDirectionSouthbound) {
-        graphics_fill_rect(ctx, GRect(3, 20, 7, 20), 0, GCornerNone);
+        graphics_context_set_fill_color(ctx, COLOUR_ROUTE_FILLED);
       } else {
-        graphics_draw_line(ctx, GPoint(3, 20), GPoint(3, 50));
-        graphics_draw_line(ctx, GPoint(9, 20), GPoint(9, 50));
+        graphics_context_set_fill_color(ctx, COLOUR_ROUTE_EMPTY);
       }
+      graphics_fill_rect(ctx, GRect(3, 20, 7, 21), 0, GCornerNone);
+      graphics_draw_rect(ctx, GRect(3, -1, 7, 21));
     }
+    graphics_context_set_fill_color(ctx, COLOUR_ROUTE_FILLED);
     graphics_fill_circle(ctx, GPoint(6, 20), 6);
+    graphics_draw_circle(ctx, GPoint(6, 20), 6);
   }
 }
 

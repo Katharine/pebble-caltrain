@@ -6,6 +6,7 @@
 #include "persist.h"
 #include "next_train_layer.h"
 #include "train_times_list.h"
+#include "colours.h"
 
 static uint8_t s_stop_id;
 static TrainStop s_stop;
@@ -19,25 +20,22 @@ static NextTrainLayer *s_sb_layer;
 static Window *s_window;
 static GFont s_res_gothic_24_bold;
 static TextLayer *s_station_name;
-static InverterLayer *s_inverterlayer_2;
 static InverterLayer *s_inverterlayer_1;
 
 static void initialise_ui(void) {
   s_window = window_create();
   window_set_fullscreen(s_window, false);
+  window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   // s_station_name
-  s_station_name = text_layer_create(GRect(0, -7, 144, 29));
-  text_layer_set_background_color(s_station_name, GColorClear);
+  s_station_name = text_layer_create(GRect(0, -8, 144, 28));
+  text_layer_set_background_color(s_station_name, COLOUR_HEADER);
+  text_layer_set_text_color(s_station_name, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_station_name, "Mountain View");
   text_layer_set_text_alignment(s_station_name, GTextAlignmentCenter);
   text_layer_set_font(s_station_name, s_res_gothic_24_bold);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_station_name);
-  
-  // s_inverterlayer_2
-  s_inverterlayer_2 = inverter_layer_create(GRect(0, 0, 145, 21));
-  layer_add_child(window_get_root_layer(s_window), (Layer *)s_inverterlayer_2);
   
   // s_inverterlayer_1
   s_inverterlayer_1 = inverter_layer_create(GRect(0, 86, 144, 2));
@@ -47,7 +45,6 @@ static void initialise_ui(void) {
 static void destroy_ui(void) {
   window_destroy(s_window);
   text_layer_destroy(s_station_name);
-  inverter_layer_destroy(s_inverterlayer_2);
   inverter_layer_destroy(s_inverterlayer_1);
 }
 // END AUTO-GENERATED UI CODE

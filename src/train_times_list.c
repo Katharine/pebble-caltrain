@@ -4,6 +4,7 @@
 #include "planning.h"
 #include "time_utils.h"
 #include "trip_stop_list.h"
+#include "colours.h"
 
 static TrainDirection s_direction;
 static uint8_t s_stop_id;
@@ -25,6 +26,7 @@ static MenuLayer *s_train_menu;
 static void initialise_ui(void) {
   s_window = window_create();
   window_set_fullscreen(s_window, false);
+  window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   s_res_gothic_18 = fonts_get_system_font(FONT_KEY_GOTHIC_18);
@@ -32,23 +34,23 @@ static void initialise_ui(void) {
   s_inverterlayer_1 = inverter_layer_create(GRect(0, 0, 144, 35));
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_inverterlayer_1);
   
-  // s_stop_name_layer
-  s_stop_name_layer = text_layer_create(GRect(0, -7, 144, 29));
-  text_layer_set_background_color(s_stop_name_layer, GColorClear);
-  text_layer_set_text_color(s_stop_name_layer, GColorWhite);
-  text_layer_set_text(s_stop_name_layer, "Mountain View");
-  text_layer_set_text_alignment(s_stop_name_layer, GTextAlignmentCenter);
-  text_layer_set_font(s_stop_name_layer, s_res_gothic_24_bold);
-  layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_name_layer);
-  
   // s_direction_layer
-  s_direction_layer = text_layer_create(GRect(0, 14, 144, 19));
-  text_layer_set_background_color(s_direction_layer, GColorClear);
-  text_layer_set_text_color(s_direction_layer, GColorWhite);
+  s_direction_layer = text_layer_create(GRect(0, 14, 144, 21));
+  text_layer_set_background_color(s_direction_layer, COLOUR_HEADER);
+  text_layer_set_text_color(s_direction_layer, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_direction_layer, "Southbound");
   text_layer_set_text_alignment(s_direction_layer, GTextAlignmentCenter);
   text_layer_set_font(s_direction_layer, s_res_gothic_18);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_direction_layer);
+  
+  // s_stop_name_layer
+  s_stop_name_layer = text_layer_create(GRect(0, -8, 144, 28));
+  text_layer_set_background_color(s_stop_name_layer, COLOUR_HEADER);
+  text_layer_set_text_color(s_stop_name_layer, COLOUR_HEADER_TEXT);
+  text_layer_set_text(s_stop_name_layer, "Mountain View");
+  text_layer_set_text_alignment(s_stop_name_layer, GTextAlignmentCenter);
+  text_layer_set_font(s_stop_name_layer, s_res_gothic_24_bold);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_name_layer);
   
   // s_train_menu
   s_train_menu = menu_layer_create(GRect(0, 35, 144, 117));
@@ -86,6 +88,11 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   graphics_context_set_text_color(ctx, GColorBlack);
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), GRect(0, -5, 114, 43), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(114, -4, 27, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+  
+  #ifdef PBL_COLOR
+    graphics_context_set_fill_color(ctx, trip_get_colour(&trip));
+    graphics_fill_circle(ctx, GPoint(135, 28), 5);
+  #endif
 }
 
 static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {

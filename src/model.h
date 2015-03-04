@@ -1,4 +1,5 @@
 #pragma once
+#include <pebble.h>
 
 #define INVALID_TIME UINT16_MAX
 
@@ -59,6 +60,9 @@ uint8_t trip_times_count(uint16_t trip_id);
 // Places up to time_count TrainTimes for trip_id in trip_stops, and returns the
 // number of times.
 uint8_t trip_get_times(uint16_t trip_id, uint8_t time_count, TrainTime *trip_stops);
+
+// Returns the expected colour of a trip.
+GColor trip_get_colour(TrainTrip *trip);
 
 // Reads TrainTime time_id into time, returning true if successful.
 bool time_get(uint16_t time_id, TrainTime *time);

@@ -13,8 +13,28 @@
     "resources": {
         "media": [
             {
-                "file": "data/trip_index.dat",
-                "name": "INDEX_TRIP_STOPS",
+                "file": "data/calendar.dat",
+                "name": "DATA_CALENDAR",
+                "type": "raw"
+            },
+            {
+                "file": "data/stops.dat",
+                "name": "DATA_STOPS",
+                "type": "raw"
+            },
+            {
+                "file": "data/trips.dat",
+                "name": "DATA_TRIPS",
+                "type": "raw"
+            },
+            {
+                "file": "data/times.dat",
+                "name": "DATA_TIMES",
+                "type": "raw"
+            },
+            {
+                "file": "data/stop_index.dat",
+                "name": "INDEX_STOP_TIMES",
                 "type": "raw"
             },
             {
@@ -24,36 +44,21 @@
                 "type": "png"
             },
             {
-                "file": "data/stop_index.dat",
-                "name": "INDEX_STOP_TIMES",
-                "type": "raw"
-            },
-            {
-                "file": "data/times.dat",
-                "name": "DATA_TIMES",
-                "type": "raw"
-            },
-            {
-                "file": "data/trips.dat",
-                "name": "DATA_TRIPS",
-                "type": "raw"
-            },
-            {
-                "file": "data/stops.dat",
-                "name": "DATA_STOPS",
-                "type": "raw"
-            },
-            {
-                "file": "data/calendar.dat",
-                "name": "DATA_CALENDAR",
+                "file": "data/trip_index.dat",
+                "name": "INDEX_TRIP_STOPS",
                 "type": "raw"
             }
         ]
     },
+    "sdkVersion": "3",
     "shortName": "Caltrain",
+    "targetPlatforms": [
+        "aplite",
+        "basalt"
+    ],
     "uuid": "40df227e-4715-4369-82ca-ec9de58889ea",
     "versionCode": 1,
-    "versionLabel": "1.4",
+    "versionLabel": "1.5",
     "watchapp": {
         "watchface": false
     }

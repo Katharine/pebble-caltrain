@@ -8,6 +8,10 @@ typedef struct {
   TextLayer *number_layer;
   TextLayer *state_layer;
   TextLayer *time_layer;
+#ifdef PBL_COLOR
+  Layer *colour_layer;
+  GColor colour_layer_colour;
+#endif
   char time_text[6];
   char number_text[4];
   char state_text[13];
@@ -23,6 +27,14 @@ static void prv_update_states(NextTrainLayer *layer, TrainTime *time) {
     text_layer_set_text(data->state_layer, data->state_text);
   }
 }
+
+#ifdef PBL_COLOR
+static void prv_update_proc(Layer *layer, GContext *ctx) {
+  NextTrainLayerData *data = layer_get_data(layer);
+  graphics_context_set_fill_color(ctx, data->colour_layer_colour);
+  graphics_fill_circle(ctx, GPoint(8, 43), 5);
+}
+#endif
 
 NextTrainLayer *next_train_layer_create(GRect frame, const char *direction_name) {
   Layer *layer = layer_create_with_data(frame, sizeof(NextTrainLayerData));
@@ -51,6 +63,10 @@ NextTrainLayer *next_train_layer_create(GRect frame, const char *direction_name)
   text_layer_set_font(data->time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_MEDIUM_NUMBERS));
   layer_add_child(layer, (Layer *)data->time_layer);
   
+  #ifdef PBL_COLOR
+    layer_set_update_proc(layer, prv_update_proc);
+  #endif
+  
   return (NextTrainLayer *)layer;
 }
 
@@ -69,12 +85,18 @@ void next_train_layer_set_time(NextTrainLayer *layer, TrainTime *time) {
   if(time->time == INVALID_TIME) {
     text_layer_set_text(data->time_layer, "--:--");
     text_layer_set_text(data->number_layer, "---");
+    #ifdef PBL_COLOR
+      data->colour_layer_colour = GColorWhite;
+    #endif
   } else {
     train_time_format_minutes(time->time, sizeof(data->time_text), data->time_text);
     text_layer_set_text(data->time_layer, data->time_text);
     trip_get(time->trip, &trip);
     snprintf(data->number_text, sizeof(data->number_text), "%d", trip.trip_name);
     text_layer_set_text(data->number_layer, data->number_text);
+    #ifdef PBL_COLOR
+      data->colour_layer_colour = trip_get_colour(&trip);
+    #endif
   }
   
   prv_update_states(layer, time);

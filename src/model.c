@@ -1,6 +1,7 @@
 #include <pebble.h>
 #include "model.h"
 #include "flash.h"
+#include "colours.h"
 
 #define MIN(X, Y) ((X) < (Y) ? (X) : (Y))
 #define MAX(X, Y) ((X) > (Y) ? (X) : (Y))
@@ -144,6 +145,20 @@ bool trip_get(uint16_t trip_id, TrainTrip *trip) {
   }
   memcpy(trip, &s_trips[trip_id], sizeof(TrainTrip));
   return true;
+}
+
+GColor trip_get_colour(TrainTrip *trip) {
+  #ifdef PBL_COLOR
+    switch(trip->route) {
+      case 0: return COLOUR_BULLET;
+      case 1: return COLOUR_LIMITED;
+      case 2: return COLOUR_LOCAL;
+      case 3: return COLOUR_SHUTTLE;
+      default: return COLOUR_SHUTTLE;
+    }
+  #else
+    return GColorWhite;
+  #endif
 }
 
 static void prv_load_calendars(void) {
