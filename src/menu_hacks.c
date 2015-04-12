@@ -17,12 +17,11 @@ void menu_hack_set_colours(GContext *ctx, MenuLayer *menu, MenuIndex *index) {
   #endif
 }
 
-// This function WILL break for anything other than 2.9.0 or 3.0-dp1.
 void menu_hack_disable_inversion(MenuLayer *menu) {
   WatchInfoVersion fw_version = watch_info_get_firmware_version();
   if(fw_version.major == 3 && fw_version.minor == 0 && fw_version.patch == 0) {
-    ((uint32_t *)menu)[46] = 0;
-  } else if(fw_version.major == 2 && fw_version.minor == 9 && fw_version.patch == 0) {
+//     ((uint32_t *)menu)[46] = 0;
+  } else if(fw_version.major == 2 && fw_version.minor == 9) {
     ((uint32_t *)menu)[60] = 0;
   }
 }
