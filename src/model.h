@@ -1,5 +1,6 @@
 #pragma once
 #include <pebble.h>
+#include "sdk_hacks.h"
 
 #define INVALID_TIME UINT16_MAX
 
