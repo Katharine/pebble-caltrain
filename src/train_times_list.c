@@ -15,7 +15,6 @@ static uint16_t s_time_count;
 
 static const char *s_direction_names[2] = {"Southbound", "Northbound"};
 
-// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
 static GFont s_res_gothic_24_bold;
 static GFont s_res_gothic_18;
@@ -55,9 +54,7 @@ static void initialise_ui(void) {
   
   // s_train_menu
   s_train_menu = menu_layer_create(GRect(0, 35, 144, 117));
-  #ifdef PBL_COLOR
-  menu_hack_disable_inversion(s_train_menu);
-  #endif
+  menu_set_colours(s_train_menu);
   if(watch_info_get_firmware_version().major >= 3) {
     scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_train_menu), true);
   }
@@ -72,7 +69,6 @@ static void destroy_ui(void) {
   text_layer_destroy(s_direction_layer);
   menu_layer_destroy(s_train_menu);
 }
-// END AUTO-GENERATED UI CODE
 
 static void prv_handle_window_unload(Window* window) {
   destroy_ui();
@@ -80,6 +76,10 @@ static void prv_handle_window_unload(Window* window) {
 }
 
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
+  #ifndef PBL_COLOR
+    graphics_context_set_fill_color(ctx, COLOUR_MENU_BACKGROUND);
+    graphics_context_set_text_color(ctx, COLOUR_MENU_FOREGROUND);
+  #endif
   char time_buf[6];
   char state_buf[13];
   char number_buf[4];
@@ -91,8 +91,6 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   snprintf(number_buf, sizeof(number_buf), "%d", trip.trip_name);
   train_time_format_minutes(time->time, sizeof(time_buf), time_buf);
   train_time_format_state(time, sizeof(state_buf), state_buf);
-  
-  menu_hack_set_colours(ctx, menu, cell_index);
   
   graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), GRect(0, -5, 114, 43), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
@@ -125,7 +123,6 @@ static void prv_init_custom_ui(void) {
     .get_num_rows = prv_get_menu_rows,
     .select_click = prv_handle_menu_click,
     .get_cell_height = prv_get_cell_height,
-    .get_separator_height = menu_hack_borderless_cells,
   });
   stop_get(s_stop_id, &s_stop);
   text_layer_set_text(s_stop_name_layer, s_stop.name);

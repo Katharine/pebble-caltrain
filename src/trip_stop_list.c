@@ -14,7 +14,6 @@ static uint8_t s_time_count;
 
 static char s_trip_name_buf[5];
 
-// BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
 static GFont s_res_gothic_24_bold;
 static GFont s_res_gothic_24;
@@ -54,9 +53,7 @@ static void initialise_ui(void) {
   
   // s_stop_list
   s_stop_list = menu_layer_create(GRect(0, 21, 144, 131));
-  #ifdef PBL_COLOR
-  menu_hack_disable_inversion(s_stop_list);
-  #endif
+  menu_set_colours(s_stop_list);
   if(watch_info_get_firmware_version().major >= 3) {
     scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_stop_list), true);
   }
@@ -71,7 +68,6 @@ static void destroy_ui(void) {
   text_layer_destroy(s_train_type);
   menu_layer_destroy(s_stop_list);
 }
-// END AUTO-GENERATED UI CODE
 
 static uint8_t prv_sequence_to_index(uint8_t sequence) {
   if(s_trip.direction == TrainDirectionSouthbound) {
@@ -82,6 +78,10 @@ static uint8_t prv_sequence_to_index(uint8_t sequence) {
 }
 
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
+  #ifndef PBL_COLOR
+    graphics_context_set_fill_color(ctx, COLOUR_MENU_BACKGROUND);
+    graphics_context_set_text_color(ctx, COLOUR_MENU_FOREGROUND);
+  #endif
   char time_buf[17];
   char minutes_buf[6];
   char zone_buf[7];
@@ -98,8 +98,6 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   } else {
     strncpy(time_buf, minutes_buf, sizeof(time_buf));
   }
-  
-  menu_hack_set_colours(ctx, menu, cell_index);
   
   graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
   
@@ -197,7 +195,6 @@ static void prv_init_custom_ui(uint16_t trip_id, uint8_t sequence) {
     .draw_row = prv_draw_menu_row,
     .get_num_rows = prv_get_menu_rows,
     .get_cell_height = prv_get_cell_height,
-    .get_separator_height = menu_hack_borderless_cells,
   });
   const MenuRowAlign align = s_trip.direction == TrainDirectionSouthbound ? MenuRowAlignTop : MenuRowAlignBottom;
   menu_layer_set_selected_index(s_stop_list, (MenuIndex){0, s_index}, align, false);
