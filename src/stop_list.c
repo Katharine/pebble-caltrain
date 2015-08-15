@@ -13,17 +13,21 @@ static MenuLayer *s_menu;
 
 static void initialise_ui(void) {
   s_window = window_create();
-  window_set_fullscreen(s_window, false);
+  window_set_fullscreen(s_window, true);
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   // s_menu
-  s_menu = menu_layer_create(GRect(0, 0, 144, 152));
-  #ifdef PBL_COLOR
-  menu_hack_disable_inversion(s_menu);
-  #endif
+  s_menu = menu_layer_create(layer_get_bounds(window_get_root_layer(s_window)));
   if(watch_info_get_firmware_version().major >= 3) {
     scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_menu), true);
   }
+#ifdef PBL_SDK_3
+  menu_layer_set_highlight_colors(s_menu, COLOUR_MENU_HIGHLIGHT_BACKGROUND, COLOUR_MENU_HIGHLIGHT_FOREGROUND);
+  menu_layer_set_normal_colors(s_menu, COLOUR_MENU_BACKGROUND, COLOUR_MENU_FOREGROUND);
+#endif
+#ifdef PBL_DISP_SHAPE_ROUND
+  menu_layer_set_center_focused(s_menu, true);
+#endif
   menu_layer_set_click_config_onto_window(s_menu, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_menu);
 }
@@ -44,17 +48,8 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   stop_get(cell_index->row, &stop);
   char zone[] = "zone 50";
   snprintf(zone, sizeof(zone), "Zone %d", (int)stop.zone);
-  
-  menu_hack_set_colours(ctx, menu, cell_index);
-    
-  if(watch_info_get_firmware_version().major >= 3) {
-    graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
-    
-    graphics_draw_text(ctx, stop.name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(5, -4, 144, 28), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-    graphics_draw_text(ctx, zone, fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(5, 19, 144, 18), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-  } else {
-    menu_cell_basic_draw(ctx, cell_layer, stop.name, zone, NULL);
-  }
+
+  menu_cell_basic_draw(ctx, cell_layer, stop.name, zone, NULL);
 }
 
 static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {

@@ -15,6 +15,9 @@ static TrainTime s_southbound;
 
 static NextTrainLayer *s_nb_layer;
 static NextTrainLayer *s_sb_layer;
+#ifdef PBL_DISP_SHAPE_ROUND
+static StatusBarLayer *s_status_bar;
+#endif
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
@@ -24,13 +27,13 @@ static InverterLayer *s_inverterlayer_1;
 
 static void initialise_ui(void) {
   s_window = window_create();
-  window_set_fullscreen(s_window, false);
+  window_set_fullscreen(s_window, DISP_SHAPE_SELECT(false, true));
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   // s_station_name
-  s_station_name = text_layer_create(GRect(0, -8, 144, 28));
-  text_layer_set_background_color(s_station_name, COLOUR_HEADER);
+  s_station_name = text_layer_create(DISP_SHAPE_SELECT(GRect(0, -8, 144, 28), GRect(0, 14, 180, 28)));
+  text_layer_set_background_color(s_station_name, GColorClear);
   text_layer_set_text_color(s_station_name, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_station_name, "Mountain View");
   text_layer_set_text_alignment(s_station_name, GTextAlignmentCenter);
@@ -38,7 +41,8 @@ static void initialise_ui(void) {
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_station_name);
   
   // s_inverterlayer_1
-  s_inverterlayer_1 = inverter_layer_create(GRect(0, 86, 144, 2));
+
+  s_inverterlayer_1 = inverter_layer_create(DISP_SHAPE_SELECT(GRect(0, 86, 144, 2), GRect(89, 74, 2, 92)));
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_inverterlayer_1);
 }
 
@@ -49,12 +53,32 @@ static void destroy_ui(void) {
 }
 // END AUTO-GENERATED UI CODE
 
+static void prv_draw_title_backing(Layer *layer, GContext *ctx) {
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
+  graphics_context_set_fill_color(ctx, COLOUR_HEADER);
+  #ifdef PBL_DISP_SHAPE_ROUND
+    graphics_fill_circle(ctx, GPoint(90, -30), 90);
+  #else
+    graphics_fill_rect(ctx, GRect(0, 0, 144, 20), 0, GCornerNone);
+  #endif
+}
+
 static void prv_init_custom_ui(void) {
-  s_nb_layer = next_train_layer_create(GRect(0, 14, 144, 71), "NB");
-  s_sb_layer = next_train_layer_create(GRect(0, 80, 144, 71), "SB");
+#ifndef PBL_DISP_SHAPE_ROUND
+  s_nb_layer = next_train_layer_create(GRect(0, 14, 144, 71), "NB", NextTrainLayerStyleHorizontal);
+  s_sb_layer = next_train_layer_create(GRect(0, 80, 144, 71), "SB", NextTrainLayerStyleHorizontal);
+#else
+  s_nb_layer = next_train_layer_create(GRect(10, 60, 74, 112), "NB", NextTrainLayerStyleRightAligned);
+  s_sb_layer = next_train_layer_create(GRect(96, 60, 74, 112), "SB", NextTrainLayerStyleLeftAligned);
+  s_status_bar = status_bar_layer_create();
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_status_bar);
+  status_bar_layer_set_colors(s_status_bar, GColorClear, GColorWhite);
+#endif
   
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_nb_layer);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_sb_layer);
+  layer_set_update_proc(window_get_root_layer(s_window), prv_draw_title_backing);
 }
 
 static void prv_destroy_custom_ui(void) {

@@ -8,6 +8,7 @@ typedef struct {
   TextLayer *number_layer;
   TextLayer *state_layer;
   TextLayer *time_layer;
+  NextTrainLayerStyle style;
 #ifdef PBL_COLOR
   Layer *colour_layer;
   GColor colour_layer_colour;
@@ -16,6 +17,61 @@ typedef struct {
   char number_text[4];
   char state_text[13];
 } NextTrainLayerData;
+
+typedef struct {
+  GRect direction;
+  GRect number;
+  char *number_font;
+  GRect state;
+  char *state_font;
+  GRect time;
+  char *time_font;
+  GPoint dot_pos;
+  int16_t dot_radius;
+  GTextAlignment alignment;
+} NextTrainLayout;
+
+static const NextTrainLayout LAYOUTS[NextTrainLayerStyleNumStyles] = {
+#ifndef PBL_DISP_SHAPE_ROUND
+  [NextTrainLayerStyleHorizontal] = {
+    {{2, 3}, {24, 28}},
+    {{0, 45}, {39, 24}},
+    FONT_KEY_GOTHIC_24,
+    {{30, 41}, {114, 32}},
+    FONT_KEY_GOTHIC_28,
+    {{21, 0}, {121, 43}},
+    FONT_KEY_BITHAM_42_MEDIUM_NUMBERS,
+    {8, 43},
+    5,
+    GTextAlignmentRight,
+  },
+#else
+  [NextTrainLayerStyleRightAligned] = {
+    {{5, 0}, {24, 28}},
+    {{38, 0}, {39, 32}},
+    FONT_KEY_GOTHIC_28,
+    {{0, 60}, {74, 64}},
+    FONT_KEY_GOTHIC_24,
+    {{0, 30}, {74, 34}},
+    FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM,
+    {60, 100},
+    9,
+    GTextAlignmentRight,
+  },
+  [NextTrainLayerStyleLeftAligned] = {
+    {{48, 0}, {24, 28}},
+    {{0, 0}, {39, 32}},
+    FONT_KEY_GOTHIC_28,
+    {{0, 60}, {74, 64}},
+    FONT_KEY_GOTHIC_24,
+    {{0, 30}, {74, 34}},
+    FONT_KEY_LECO_26_BOLD_NUMBERS_AM_PM,
+    {11, 100},
+    9,
+    GTextAlignmentLeft,
+  },
+#endif
+};
 
 // Updates the state layer given the TrainTime of the next train.
 static void prv_update_states(NextTrainLayer *layer, TrainTime *time) {
@@ -32,35 +88,39 @@ static void prv_update_states(NextTrainLayer *layer, TrainTime *time) {
 static void prv_update_proc(Layer *layer, GContext *ctx) {
   NextTrainLayerData *data = layer_get_data(layer);
   graphics_context_set_fill_color(ctx, data->colour_layer_colour);
-  graphics_fill_circle(ctx, GPoint(8, 43), 5);
+  graphics_fill_circle(ctx, LAYOUTS[data->style].dot_pos, LAYOUTS[data->style].dot_radius);
+  // graphics_context_set_fill_color(ctx, COLOR_FALLBACK(GColorRed, GColorWhite));
+  // graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
 }
 #endif
 
-NextTrainLayer *next_train_layer_create(GRect frame, const char *direction_name) {
+NextTrainLayer *next_train_layer_create(GRect frame, const char *direction_name, NextTrainLayerStyle style) {
   Layer *layer = layer_create_with_data(frame, sizeof(NextTrainLayerData));
   NextTrainLayerData *data = layer_get_data(layer);
+  data->style = style;
+  const NextTrainLayout *layout = &LAYOUTS[style];
   
-  data->direction_layer = text_layer_create(GRect(2, 3, 24, 28));
+  data->direction_layer = text_layer_create(layout->direction);
   text_layer_set_font(data->direction_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   text_layer_set_background_color(data->direction_layer, GColorClear);
   text_layer_set_text(data->direction_layer, direction_name);
   layer_add_child(layer, (Layer *)data->direction_layer);
   
-  data->number_layer = text_layer_create(GRect(0, 45, 39, 24));
-  text_layer_set_font(data->number_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24));
+  data->number_layer = text_layer_create(layout->number);
+  text_layer_set_font(data->number_layer, fonts_get_system_font(layout->number_font));
   text_layer_set_background_color(data->number_layer, GColorClear);
   layer_add_child(layer, (Layer *)data->number_layer);
   
-  data->state_layer = text_layer_create(GRect(30, 41, 114, 32));
+  data->state_layer = text_layer_create(layout->state);
   text_layer_set_background_color(data->state_layer, GColorClear);
-  text_layer_set_text_alignment(data->state_layer, GTextAlignmentRight);
-  text_layer_set_font(data->state_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28));
+  text_layer_set_text_alignment(data->state_layer, layout->alignment);
+  text_layer_set_font(data->state_layer, fonts_get_system_font(layout->state_font));
   layer_add_child(layer, (Layer *)data->state_layer);
   
-  data->time_layer = text_layer_create(GRect(21, 0, 121, 43));
+  data->time_layer = text_layer_create(layout->time);
   text_layer_set_background_color(data->time_layer, GColorClear);
-  text_layer_set_text_alignment(data->time_layer, GTextAlignmentRight);
-  text_layer_set_font(data->time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_MEDIUM_NUMBERS));
+  text_layer_set_text_alignment(data->time_layer, layout->alignment);
+  text_layer_set_font(data->time_layer, fonts_get_system_font(layout->time_font));
   layer_add_child(layer, (Layer *)data->time_layer);
   
   #ifdef PBL_COLOR

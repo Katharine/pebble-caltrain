@@ -15,6 +15,10 @@ static uint16_t s_time_count;
 
 static const char *s_direction_names[2] = {"Southbound", "Northbound"};
 
+#ifdef PBL_DISP_SHAPE_ROUND
+static StatusBarLayer *s_status_bar;
+#endif
+
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
 static Window *s_window;
 static GFont s_res_gothic_24_bold;
@@ -26,7 +30,7 @@ static MenuLayer *s_train_menu;
 
 static void initialise_ui(void) {
   s_window = window_create();
-  window_set_fullscreen(s_window, false);
+  window_set_fullscreen(s_window, DISP_SHAPE_SELECT(false, true));
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
@@ -42,7 +46,9 @@ static void initialise_ui(void) {
   text_layer_set_text(s_direction_layer, "Southbound");
   text_layer_set_text_alignment(s_direction_layer, GTextAlignmentCenter);
   text_layer_set_font(s_direction_layer, s_res_gothic_18);
+  #ifndef PBL_DISP_SHAPE_ROUND
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_direction_layer);
+  #endif
   
   // s_stop_name_layer
   s_stop_name_layer = text_layer_create(GRect(0, -8, 144, 28));
@@ -51,18 +57,25 @@ static void initialise_ui(void) {
   text_layer_set_text(s_stop_name_layer, "Mountain View");
   text_layer_set_text_alignment(s_stop_name_layer, GTextAlignmentCenter);
   text_layer_set_font(s_stop_name_layer, s_res_gothic_24_bold);
+  #ifndef PBL_DISP_SHAPE_ROUND
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_name_layer);
+  #endif
   
   // s_train_menu
-  s_train_menu = menu_layer_create(GRect(0, 35, 144, 117));
-  #ifdef PBL_COLOR
-  menu_hack_disable_inversion(s_train_menu);
+  GSize size = layer_get_bounds(window_get_root_layer(s_window)).size;
+  s_train_menu = menu_layer_create(GRect(0, DISP_SHAPE_SELECT(35, 0), size.w, size.h - DISP_SHAPE_SELECT(35, 0)));
+  #ifdef PBL_DISP_SHAPE_ROUND
+    menu_layer_set_center_focused(s_train_menu, true);
   #endif
-  if(watch_info_get_firmware_version().major >= 3) {
-    scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_train_menu), true);
-  }
   menu_layer_set_click_config_onto_window(s_train_menu, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_train_menu);
+
+  #ifdef PBL_DISP_SHAPE_ROUND
+  s_status_bar = status_bar_layer_create();
+  status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
+  status_bar_layer_set_separator_mode(s_status_bar, StatusBarLayerSeparatorModeDotted);
+  layer_add_child(window_get_root_layer(s_window), (Layer *)s_status_bar);
+  #endif
 }
 
 static void destroy_ui(void) {
@@ -80,12 +93,24 @@ static void prv_handle_window_unload(Window* window) {
 }
 
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
+  menu_hack_set_colours(ctx, menu, cell_index);
+  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);  
+  uint16_t row = cell_index->row;
+  #ifdef PBL_DISP_SHAPE_ROUND
+  if (row == 0) {
+    graphics_draw_text(ctx, s_stop.name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0, -2, 180, 30), GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, s_direction_names[s_direction], fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(0, 20, 180, 20), GTextOverflowModeFill, GTextAlignmentCenter, NULL);
+    return;
+  } else {
+    row -= 1;
+  }
+  #endif
   char time_buf[6];
   char state_buf[13];
   char number_buf[4];
   TrainTrip trip;
   
-  TrainTime *time = &s_times[cell_index->row];
+  TrainTime *time = &s_times[row];
   
   trip_get(time->trip, &trip);
   snprintf(number_buf, sizeof(number_buf), "%d", trip.trip_name);
@@ -93,14 +118,41 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   train_time_format_state(time, sizeof(state_buf), state_buf);
   
   menu_hack_set_colours(ctx, menu, cell_index);
+
+  #ifndef PBL_SDK_2
+  const bool highlighted = menu_cell_layer_is_highlighted(cell_layer);
+  #endif
   
-  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
-  graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), GRect(0, -5, 114, 43), GTextOverflowModeFill, GTextAlignmentLeft, NULL);
-  graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(114, -6, 27, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+  GRect time_rect = GRect(0, -5, layer_get_bounds(cell_layer).size.w, 43);
+  #ifdef PBL_DISP_SHAPE_ROUND
+    if(highlighted) {
+      time_rect.origin.y += 5;
+    }
+  #endif
+  graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), time_rect, 
+                     GTextOverflowModeFill, DISP_SHAPE_SELECT(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+
+  GPoint circle_point = DISP_SHAPE_SELECT(GPoint(135, 26), GPoint(105, 49));
+
+  #ifndef PBL_DISP_SHAPE_ROUND
+    graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(114, -6, 27, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+  #else
+    if(highlighted) {
+      graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(0, 32, 98, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
+      graphics_context_set_fill_color(ctx, trip_get_colour(&trip));
+    }
+  #endif
   
-  #ifdef PBL_COLOR
-    graphics_context_set_fill_color(ctx, trip_get_colour(&trip));
-    graphics_fill_circle(ctx, GPoint(135, 26), 5);
+  #if defined(PBL_COLOR)
+    if(DISP_SHAPE_SELECT(true, highlighted)) {
+      if (gcolor_equal(trip_get_colour(&trip), COLOUR_MENU_HIGHLIGHT_BACKGROUND)) {
+        graphics_context_set_stroke_color(ctx, GColorWhite);
+        graphics_draw_circle(ctx, circle_point, 5);
+      } else {
+        graphics_context_set_fill_color(ctx, trip_get_colour(&trip));
+        graphics_fill_circle(ctx, circle_point, 5);
+      }
+    }
   #endif
 }
 
@@ -109,14 +161,27 @@ static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section
 }
 
 static void prv_handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
-  if(cell_index->row < s_time_count) {
-    const TrainTime *time = &s_times[cell_index->row];
+  int16_t row = cell_index->row;
+  #ifdef PBL_DISP_SHAPE_ROUND
+  if (row == 0) {
+    return;
+  }
+  row -= 1;
+  #endif
+  if(row < s_time_count) {
+    const TrainTime *time = &s_times[row];
     show_trip_stop_list(time->trip, time->sequence);
   }
 }
 
 static int16_t prv_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
-  return 36;
+  MenuIndex selected_index = menu_layer_get_selected_index(menu_layer);
+  #ifdef PBL_DISP_SHAPE_ROUND
+    if (cell_index->row == 0) {
+      return 45;
+    }
+  #endif
+  return DISP_SHAPE_SELECT(36, menu_index_compare(&selected_index, cell_index) == 0 ? 66 : 36);
 }
 
 static void prv_init_custom_ui(void) {
@@ -138,6 +203,9 @@ void show_train_times_list(uint8_t station, TrainDirection direction) {
   s_time_count = get_future_trains(s_stop_id, s_direction, &s_times);
   initialise_ui();
   prv_init_custom_ui();
+  #ifdef PBL_DISP_SHAPE_ROUND
+  menu_layer_set_selected_index(s_train_menu, (MenuIndex){0, 1}, MenuRowAlignCenter, false);
+  #endif
   window_set_window_handlers(s_window, (WindowHandlers) {
     .unload = prv_handle_window_unload,
   });
