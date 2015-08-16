@@ -1,3 +1,5 @@
+#ifndef PBL_DISP_SHAPE_ROUND
+
 #include "trip_stop_list.h"
 #include <pebble.h>
 #include "model.h"
@@ -224,3 +226,5 @@ void show_trip_stop_list(uint16_t trip_id, uint8_t sequence) {
 void hide_trip_stop_list(void) {
   window_stack_remove(s_window, true);
 }
+
+#endif
