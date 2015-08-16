@@ -157,7 +157,7 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
 }
 
 static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-  return s_time_count;
+  return s_time_count + DISP_SHAPE_SELECT(0, 1);
 }
 
 static void prv_handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
