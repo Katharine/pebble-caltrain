@@ -21,7 +21,7 @@ def configure(ctx):
     ctx.load('pebble_sdk')
 
 def build(ctx):
-    if {{jshint}} and hint is not None:
+    if False and hint is not None:
         try:
             hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
         except ErrorReturnCode_2 as e:
@@ -29,7 +29,7 @@ def build(ctx):
 
     # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
     ctx.path.make_node('src/js/').mkdir()
-    js_paths = [shlex.quote(x) for x in ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])]
+    js_paths = ctx.path.ant_glob(['src/*.js', 'src/**/*.js'])
     if js_paths:
         ctx(rule='cat ${SRC} > ${TGT}', source=js_paths, target='pebble-js-app.js')
         has_js = True
