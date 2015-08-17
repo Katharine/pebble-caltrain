@@ -17,6 +17,7 @@ static NextTrainLayer *s_nb_layer;
 static NextTrainLayer *s_sb_layer;
 #ifdef PBL_DISP_SHAPE_ROUND
 static StatusBarLayer *s_status_bar;
+static ActionMenu *s_action_menu;
 #endif
 
 // BEGIN AUTO-GENERATED UI CODE; DO NOT MODIFY
@@ -59,6 +60,8 @@ static void prv_draw_title_backing(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, COLOUR_HEADER);
   #ifdef PBL_DISP_SHAPE_ROUND
     graphics_fill_circle(ctx, GPoint(90, -30), 90);
+    graphics_context_set_fill_color(ctx, GColorBlack);
+    graphics_fill_circle(ctx, GPoint(180, 90), 9);
   #else
     graphics_fill_rect(ctx, GRect(0, 0, 144, 20), 0, GCornerNone);
   #endif
@@ -120,9 +123,42 @@ static void prv_handle_down_click(ClickRecognizerRef recognizer, void *context) 
   show_train_times_list(s_stop_id, TrainDirectionSouthbound);
 }
 
+#ifdef PBL_DISP_SHAPE_ROUND
+static void prv_handle_action(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
+  TrainDirection direction = (TrainDirection)action_menu_item_get_action_data(action);
+  show_train_times_list(s_stop_id, direction);
+}
+
+static void prv_menu_did_close(ActionMenu *menu, const ActionMenuItem *performed_action, void *context) {
+  action_menu_hierarchy_destroy(action_menu_get_root_level(menu), NULL, NULL);
+}
+
+static void prv_show_action_menu(void) {
+  ActionMenuLevel *root = action_menu_level_create(2);
+  action_menu_level_add_action(root, "Northbound", prv_handle_action, (void *)TrainDirectionNorthbound);
+  action_menu_level_add_action(root, "Southbound", prv_handle_action, (void *)TrainDirectionSouthbound);
+  s_action_menu = action_menu_open(&(ActionMenuConfig){
+    .root_level = root,
+    .colors = {
+      .background = GColorBlack,
+      .foreground = GColorRed,
+    },
+    .did_close = prv_menu_did_close,
+    .align = ActionMenuAlignCenter,
+  });
+}
+
+static void prv_handle_select_click(ClickRecognizerRef recognizer, void *context) {
+  prv_show_action_menu();
+}
+#endif
+
 static void prv_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, prv_handle_up_click);
   window_single_click_subscribe(BUTTON_ID_DOWN, prv_handle_down_click);
+  #ifdef PBL_DISP_SHAPE_ROUND
+    window_single_click_subscribe(BUTTON_ID_SELECT, prv_handle_select_click);
+  #endif
 }
 
 void show_stop_info(uint8_t stop_id) {

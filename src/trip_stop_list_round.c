@@ -1,7 +1,7 @@
 #ifdef PBL_DISP_SHAPE_ROUND
 
-#include <pebble.h>
 #include "trip_stop_list.h"
+#include <pebble.h>
 #include "model.h"
 #include "time_utils.h"
 #include "colours.h"
@@ -22,7 +22,7 @@ static TextLayer *s_time_layer;
 static char s_time_buf[17];
 
 static const int16_t ARC_RADIUS = 77;
-static const int16_t ARC_WIDTH = 2;
+static const int16_t ARC_WIDTH = 3;
 static const GPoint ORIGIN = {90, 90};
 
 static inline uint8_t prv_get_stop_id(uint8_t i) {
@@ -36,6 +36,10 @@ static inline GColor prv_color_stop(uint8_t stop_id) {
 static void prv_draw_window(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, COLOUR_WINDOW);
   graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
+
+  graphics_context_set_fill_color(ctx, COLOUR_MENU_HIGHLIGHT_BACKGROUND);
+  graphics_fill_circle(ctx, ORIGIN, 64);
+
   int32_t d_theta = TRIG_MAX_ANGLE / s_time_count;
   // int32_t theta = 0;
   for(uint8_t i = 0; i < s_time_count; i++) {
@@ -43,13 +47,9 @@ static void prv_draw_window(Layer *layer, GContext *ctx) {
     uint8_t stop_id = prv_get_stop_id(i);
     graphics_context_set_fill_color(ctx, prv_color_stop(stop_id));
     if (stop_id != s_time_count - 1) {
-      graphics_fill_radial(ctx, ORIGIN, ARC_RADIUS - ARC_WIDTH, ARC_RADIUS, theta, theta + d_theta);
+      graphics_fill_radial(ctx, ORIGIN, ARC_RADIUS - ARC_WIDTH + 1, ARC_RADIUS + 1, theta, theta + d_theta);
     }
   }
-
-  // graphics_context_set_fill_color(ctx, COLOUR_MENU_HIGHLIGHT_BACKGROUND);
-  // GPoint highlight_xy = gpoint_from_polar(&ORIGIN, ARC_RADIUS, d_theta * (s_selected_stop - s_sequence));
-  // graphics_fill_circle(ctx, highlight_xy, 8);
 
   for(uint8_t i = 0; i < s_time_count; i++) {
     int32_t theta = i * d_theta;
@@ -121,18 +121,21 @@ static void prv_init_ui(void) {
 
   s_stop_layer = text_layer_create(GRect(30, 70, 120, 30));
   text_layer_set_font(s_stop_layer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD));
+  text_layer_set_text_color(s_stop_layer, GColorWhite);
   text_layer_set_background_color(s_stop_layer, GColorClear);
   text_layer_set_text_alignment(s_stop_layer, GTextAlignmentCenter);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_layer);
 
   s_time_layer = text_layer_create(GRect(30, 100, 120, 30));
   text_layer_set_font(s_time_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text_color(s_time_layer, GColorWhite);
   text_layer_set_background_color(s_time_layer, GColorClear);
   text_layer_set_text_alignment(s_time_layer, GTextAlignmentCenter);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_time_layer);
 
   s_zone_layer = text_layer_create(GRect(30, 50, 120, 30));
   text_layer_set_font(s_zone_layer, fonts_get_system_font(FONT_KEY_GOTHIC_18_BOLD));
+  text_layer_set_text_color(s_zone_layer, GColorWhite);
   text_layer_set_background_color(s_zone_layer, GColorClear);
   text_layer_set_text_alignment(s_zone_layer, GTextAlignmentCenter);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_zone_layer);
