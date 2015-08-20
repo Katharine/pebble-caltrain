@@ -61,7 +61,7 @@ static void prv_draw_title_backing(Layer *layer, GContext *ctx) {
   #ifdef PBL_DISP_SHAPE_ROUND
     graphics_fill_circle(ctx, GPoint(90, -30), 90);
     graphics_context_set_fill_color(ctx, GColorBlack);
-    graphics_fill_circle(ctx, GPoint(180, 90), 9);
+    graphics_fill_circle(ctx, GPoint(190, 90), 15);
   #else
     graphics_fill_rect(ctx, GRect(0, 0, 144, 20), 0, GCornerNone);
   #endif
