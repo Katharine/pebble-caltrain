@@ -32,7 +32,7 @@ typedef struct {
 } NextTrainLayout;
 
 static const NextTrainLayout LAYOUTS[NextTrainLayerStyleNumStyles] = {
-#ifndef PBL_DISP_SHAPE_ROUND
+#ifndef PBL_ROUND
   [NextTrainLayerStyleHorizontal] = {
     {{2, 3}, {24, 28}},
     {{0, 45}, {39, 24}},

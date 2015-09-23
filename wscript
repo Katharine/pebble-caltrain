@@ -1,4 +1,5 @@
-#
+
+    #
 # This file is the default set of rules to compile a Pebble project.
 #
 # Feel free to customize this to your needs.
@@ -25,7 +26,7 @@ def build(ctx):
         try:
             hint([node.abspath() for node in ctx.path.ant_glob("src/**/*.js")], _tty_out=False) # no tty because there are none in the cloudpebble sandbox.
         except ErrorReturnCode_2 as e:
-            ctx.fatal("\\nJavaScript linting failed (you can disable this in Project Settings):\\n" + e.stdout)
+            ctx.fatal("\nJavaScript linting failed (you can disable this in Project Settings):\n" + e.stdout)
 
     # Concatenate all our JS files (but not recursively), and only if any JS exists in the first place.
     ctx.path.make_node('src/js/').mkdir()
@@ -58,3 +59,4 @@ def build(ctx):
 
     ctx.set_group('bundle')
     ctx.pbl_bundle(binaries=binaries, js='pebble-js-app.js' if has_js else [])
+    

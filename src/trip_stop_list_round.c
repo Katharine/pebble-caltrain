@@ -1,4 +1,4 @@
-#ifdef PBL_DISP_SHAPE_ROUND
+#ifdef PBL_ROUND
 
 #include "trip_stop_list.h"
 #include <pebble.h>
@@ -21,9 +21,7 @@ static char s_zone_buf[7];
 static TextLayer *s_time_layer;
 static char s_time_buf[17];
 
-static const int16_t ARC_RADIUS = 77;
-static const int16_t ARC_WIDTH = 3;
-static const GPoint ORIGIN = {90, 90};
+static const int16_t ARC_WIDTH = 4;
 
 static inline uint8_t prv_get_stop_id(uint8_t i) {
   return (s_sequence + i ) % s_time_count;
@@ -34,27 +32,31 @@ static inline GColor prv_color_stop(uint8_t stop_id) {
 }
 
 static void prv_draw_window(Layer *layer, GContext *ctx) {
+  const GRect bounds = layer_get_bounds(layer);
+  const GRect inset_bounds = grect_inset(bounds, GEdgeInsets(13));
+  
   graphics_context_set_fill_color(ctx, COLOUR_WINDOW);
-  graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
+  graphics_fill_rect(ctx, bounds, 0, GCornerNone);
 
   graphics_context_set_fill_color(ctx, COLOUR_MENU_HIGHLIGHT_BACKGROUND);
-  graphics_fill_circle(ctx, ORIGIN, 64);
+  graphics_fill_radial(ctx, grect_inset(bounds, GEdgeInsets(26)), GOvalScaleModeFillCircle, 90, 0, TRIG_MAX_ANGLE);
 
   int32_t d_theta = TRIG_MAX_ANGLE / s_time_count;
   // int32_t theta = 0;
+  graphics_context_set_stroke_width(ctx, ARC_WIDTH);
   for(uint8_t i = 0; i < s_time_count; i++) {
     int32_t theta = i * d_theta;
     uint8_t stop_id = prv_get_stop_id(i);
-    graphics_context_set_fill_color(ctx, prv_color_stop(stop_id));
+    graphics_context_set_stroke_color(ctx, prv_color_stop(stop_id));
     if (stop_id != s_time_count - 1) {
-      graphics_fill_radial(ctx, ORIGIN, ARC_RADIUS - ARC_WIDTH + 1, ARC_RADIUS + 1, theta, theta + d_theta);
+      graphics_draw_arc(ctx, inset_bounds, GOvalScaleModeFillCircle, theta, theta + d_theta);
     }
   }
 
   for(uint8_t i = 0; i < s_time_count; i++) {
     int32_t theta = i * d_theta;
     uint8_t stop_id =  prv_get_stop_id(i);
-    GPoint xy = gpoint_from_polar(&ORIGIN, ARC_RADIUS, theta);
+    GPoint xy = gpoint_from_polar(inset_bounds, GOvalScaleModeFillCircle, theta);
     graphics_context_set_fill_color(ctx, stop_id  == s_selected_stop 
                                     ? COLOUR_MENU_HIGHLIGHT_BACKGROUND : prv_color_stop(stop_id));
     graphics_fill_circle(ctx, xy, 5);

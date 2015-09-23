@@ -25,9 +25,6 @@ static void initialise_ui(void) {
   menu_layer_set_highlight_colors(s_menu, COLOUR_MENU_HIGHLIGHT_BACKGROUND, COLOUR_MENU_HIGHLIGHT_FOREGROUND);
   menu_layer_set_normal_colors(s_menu, COLOUR_MENU_BACKGROUND, COLOUR_MENU_FOREGROUND);
 #endif
-#ifdef PBL_DISP_SHAPE_ROUND
-  menu_layer_set_center_focused(s_menu, true);
-#endif
   menu_layer_set_click_config_onto_window(s_menu, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_menu);
 }

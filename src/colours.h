@@ -1,6 +1,6 @@
 #pragma once
 #include <pebble.h>
-
+  
 #ifdef PBL_COLOR
   #define COLOUR_HEADER GColorRed
   #define COLOUR_HEADER_TEXT GColorWhite
@@ -30,8 +30,4 @@
   #define COLOUR_ROUTE_OUTLINE GColorBlack
   #define COLOUR_ROUTE_FILLED GColorBlack
   #define COLOUR_ROUTE_EMPTY GColorWhite
-#endif
-
-#ifdef PBL_SDK_2
-#define DISP_SHAPE_SELECT(a, b) (a)
 #endif

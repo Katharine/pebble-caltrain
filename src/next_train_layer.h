@@ -6,7 +6,7 @@
 typedef Layer NextTrainLayer;
 
 typedef enum {
-#ifndef PBL_DISP_SHAPE_ROUND
+#ifndef PBL_ROUND
     NextTrainLayerStyleHorizontal,
 #else
     NextTrainLayerStyleRightAligned,

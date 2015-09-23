@@ -1,4 +1,4 @@
-#ifndef PBL_DISP_SHAPE_ROUND
+#ifndef PBL_ROUND
 
 #include "trip_stop_list.h"
 #include <pebble.h>

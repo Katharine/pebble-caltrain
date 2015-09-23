@@ -15,7 +15,7 @@ static TrainTime s_southbound;
 
 static NextTrainLayer *s_nb_layer;
 static NextTrainLayer *s_sb_layer;
-#ifdef PBL_DISP_SHAPE_ROUND
+#ifdef PBL_ROUND
 static StatusBarLayer *s_status_bar;
 static ActionMenu *s_action_menu;
 #endif
@@ -28,12 +28,12 @@ static InverterLayer *s_inverterlayer_1;
 
 static void initialise_ui(void) {
   s_window = window_create();
-  window_set_fullscreen(s_window, DISP_SHAPE_SELECT(false, true));
+  window_set_fullscreen(s_window, PBL_IF_RECT_ELSE(false, true));
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   // s_station_name
-  s_station_name = text_layer_create(DISP_SHAPE_SELECT(GRect(0, -8, 144, 28), GRect(0, 14, 180, 28)));
+  s_station_name = text_layer_create(PBL_IF_RECT_ELSE(GRect(0, -8, 144, 28), GRect(0, 14, 180, 28)));
   text_layer_set_background_color(s_station_name, GColorClear);
   text_layer_set_text_color(s_station_name, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_station_name, "Mountain View");
@@ -43,7 +43,7 @@ static void initialise_ui(void) {
   
   // s_inverterlayer_1
 
-  s_inverterlayer_1 = inverter_layer_create(DISP_SHAPE_SELECT(GRect(0, 86, 144, 2), GRect(89, 74, 2, 92)));
+  s_inverterlayer_1 = inverter_layer_create(PBL_IF_RECT_ELSE(GRect(0, 86, 144, 2), GRect(89, 74, 2, 92)));
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_inverterlayer_1);
 }
 
@@ -58,17 +58,18 @@ static void prv_draw_title_backing(Layer *layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
   graphics_context_set_fill_color(ctx, COLOUR_HEADER);
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
     graphics_fill_circle(ctx, GPoint(90, -30), 90);
     graphics_context_set_fill_color(ctx, GColorBlack);
     graphics_fill_circle(ctx, GPoint(190, 90), 15);
+    graphics_fill_rect(ctx, GRect(88, 77, 2, 85), 0, GCornerNone);
   #else
     graphics_fill_rect(ctx, GRect(0, 0, 144, 20), 0, GCornerNone);
   #endif
 }
 
 static void prv_init_custom_ui(void) {
-#ifndef PBL_DISP_SHAPE_ROUND
+#ifndef PBL_ROUND
   s_nb_layer = next_train_layer_create(GRect(0, 14, 144, 71), "NB", NextTrainLayerStyleHorizontal);
   s_sb_layer = next_train_layer_create(GRect(0, 80, 144, 71), "SB", NextTrainLayerStyleHorizontal);
 #else
@@ -123,7 +124,7 @@ static void prv_handle_down_click(ClickRecognizerRef recognizer, void *context) 
   show_train_times_list(s_stop_id, TrainDirectionSouthbound);
 }
 
-#ifdef PBL_DISP_SHAPE_ROUND
+#ifdef PBL_ROUND
 static void prv_handle_action(ActionMenu *action_menu, const ActionMenuItem *action, void *context) {
   TrainDirection direction = (TrainDirection)action_menu_item_get_action_data(action);
   show_train_times_list(s_stop_id, direction);
@@ -156,7 +157,7 @@ static void prv_handle_select_click(ClickRecognizerRef recognizer, void *context
 static void prv_click_config_provider(void *context) {
   window_single_click_subscribe(BUTTON_ID_UP, prv_handle_up_click);
   window_single_click_subscribe(BUTTON_ID_DOWN, prv_handle_down_click);
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
     window_single_click_subscribe(BUTTON_ID_SELECT, prv_handle_select_click);
   #endif
 }

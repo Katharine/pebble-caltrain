@@ -2,10 +2,10 @@
 #include "flash.h"
 
 // Take advantage of extra space on snowy.
-#ifdef PBL_PLATFORM_BASALT
-  #define BUFFER_SIZE 8192
-#else
+#ifdef PBL_PLATFORM_APLITE
   #define BUFFER_SIZE 4096
+#else
+  #define BUFFER_SIZE 8192
 #endif
 
 static ResHandle s_handle = NULL;

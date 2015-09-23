@@ -15,7 +15,7 @@ static uint16_t s_time_count;
 
 static const char *s_direction_names[2] = {"Southbound", "Northbound"};
 
-#ifdef PBL_DISP_SHAPE_ROUND
+#ifdef PBL_ROUND
 static StatusBarLayer *s_status_bar;
 #endif
 
@@ -30,7 +30,7 @@ static MenuLayer *s_train_menu;
 
 static void initialise_ui(void) {
   s_window = window_create();
-  window_set_fullscreen(s_window, DISP_SHAPE_SELECT(false, true));
+  window_set_fullscreen(s_window, PBL_IF_RECT_ELSE(false, true));
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
@@ -46,7 +46,7 @@ static void initialise_ui(void) {
   text_layer_set_text(s_direction_layer, "Southbound");
   text_layer_set_text_alignment(s_direction_layer, GTextAlignmentCenter);
   text_layer_set_font(s_direction_layer, s_res_gothic_18);
-  #ifndef PBL_DISP_SHAPE_ROUND
+  #ifndef PBL_ROUND
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_direction_layer);
   #endif
   
@@ -63,14 +63,14 @@ static void initialise_ui(void) {
   
   // s_train_menu
   GSize size = layer_get_bounds(window_get_root_layer(s_window)).size;
-  s_train_menu = menu_layer_create(GRect(0, DISP_SHAPE_SELECT(35, 0), size.w, size.h - DISP_SHAPE_SELECT(35, 0)));
-  #ifdef PBL_DISP_SHAPE_ROUND
+  s_train_menu = menu_layer_create(GRect(0, PBL_IF_RECT_ELSE(35, 0), size.w, size.h - PBL_IF_RECT_ELSE(35, 0)));
+  #ifdef PBL_ROUND
     menu_layer_set_center_focused(s_train_menu, true);
   #endif
   menu_layer_set_click_config_onto_window(s_train_menu, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_train_menu);
 
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
   s_status_bar = status_bar_layer_create();
   status_bar_layer_set_colors(s_status_bar, GColorWhite, GColorBlack);
   status_bar_layer_set_separator_mode(s_status_bar, StatusBarLayerSeparatorModeDotted);
@@ -96,7 +96,7 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   menu_hack_set_colours(ctx, menu, cell_index);
   graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);  
   uint16_t row = cell_index->row;
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
   if (row == 0) {
     graphics_draw_text(ctx, s_stop.name, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0, -2, 180, 30), GTextOverflowModeFill, GTextAlignmentCenter, NULL);
     graphics_draw_text(ctx, s_direction_names[s_direction], fonts_get_system_font(FONT_KEY_GOTHIC_18), GRect(0, 20, 180, 20), GTextOverflowModeFill, GTextAlignmentCenter, NULL);
@@ -130,11 +130,11 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
     }
   #endif
   graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), time_rect, 
-                     GTextOverflowModeFill, DISP_SHAPE_SELECT(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
+                     GTextOverflowModeFill, PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
 
-  GPoint circle_point = DISP_SHAPE_SELECT(GPoint(135, 26), GPoint(105, 49));
+  GPoint circle_point = PBL_IF_RECT_ELSE(GPoint(135, 26), GPoint(105, 49));
 
-  #ifndef PBL_DISP_SHAPE_ROUND
+  #ifndef PBL_ROUND
     graphics_draw_text(ctx, number_buf, fonts_get_system_font(FONT_KEY_GOTHIC_24), GRect(114, -6, 27, 20), GTextOverflowModeFill, GTextAlignmentRight, NULL);
   #else
     if(highlighted) {
@@ -143,8 +143,8 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
     }
   #endif
   
-  #if defined(PBL_COLOR)
-    if(DISP_SHAPE_SELECT(true, highlighted)) {
+  #ifdef PBL_COLOR
+    if(PBL_IF_RECT_ELSE(true, highlighted)) {
       if (gcolor_equal(trip_get_colour(&trip), COLOUR_MENU_HIGHLIGHT_BACKGROUND)) {
         graphics_context_set_stroke_color(ctx, GColorWhite);
         graphics_draw_circle(ctx, circle_point, 5);
@@ -157,12 +157,12 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
 }
 
 static uint16_t prv_get_menu_rows(struct MenuLayer *menu_layer, uint16_t section_index, void *callback_context) {
-  return s_time_count + DISP_SHAPE_SELECT(0, 1);
+  return s_time_count + PBL_IF_RECT_ELSE(0, 1);
 }
 
 static void prv_handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *context) {
   int16_t row = cell_index->row;
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
   if (row == 0) {
     return;
   }
@@ -176,12 +176,12 @@ static void prv_handle_menu_click(struct MenuLayer *menu_layer, MenuIndex *cell_
 
 static int16_t prv_get_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index, void *callback_context) {
   MenuIndex selected_index = menu_layer_get_selected_index(menu_layer);
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
     if (cell_index->row == 0) {
       return 45;
     }
   #endif
-  return DISP_SHAPE_SELECT(36, menu_index_compare(&selected_index, cell_index) == 0 ? 66 : 36);
+  return PBL_IF_RECT_ELSE(36, menu_index_compare(&selected_index, cell_index) == 0 ? 66 : 36);
 }
 
 static void prv_init_custom_ui(void) {
@@ -203,7 +203,7 @@ void show_train_times_list(uint8_t station, TrainDirection direction) {
   s_time_count = get_future_trains(s_stop_id, s_direction, &s_times);
   initialise_ui();
   prv_init_custom_ui();
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
   menu_layer_set_selected_index(s_train_menu, (MenuIndex){0, 1}, MenuRowAlignCenter, false);
   #endif
   window_set_window_handlers(s_window, (WindowHandlers) {
