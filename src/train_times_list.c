@@ -32,13 +32,13 @@ static void initialise_ui(void) {
   s_window = window_create();
   window_set_fullscreen(s_window, PBL_IF_RECT_ELSE(false, true));
   window_set_background_color(s_window, COLOUR_WINDOW);
-  
+
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   s_res_gothic_18 = fonts_get_system_font(FONT_KEY_GOTHIC_18);
   // s_inverterlayer_1
   s_inverterlayer_1 = inverter_layer_create(GRect(0, 0, 144, 35));
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_inverterlayer_1);
-  
+
   // s_direction_layer
   s_direction_layer = text_layer_create(GRect(0, 14, 144, 21));
   text_layer_set_background_color(s_direction_layer, COLOUR_HEADER);
@@ -49,7 +49,7 @@ static void initialise_ui(void) {
   #ifndef PBL_ROUND
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_direction_layer);
   #endif
-  
+
   // s_stop_name_layer
   s_stop_name_layer = text_layer_create(GRect(0, -8, 144, 28));
   text_layer_set_background_color(s_stop_name_layer, COLOUR_HEADER);
@@ -60,7 +60,7 @@ static void initialise_ui(void) {
   #ifndef PBL_DISP_SHAPE_ROUND
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_name_layer);
   #endif
-  
+
   // s_train_menu
   GSize size = layer_get_bounds(window_get_root_layer(s_window)).size;
   s_train_menu = menu_layer_create(GRect(0, PBL_IF_RECT_ELSE(35, 0), size.w, size.h - PBL_IF_RECT_ELSE(35, 0)));
@@ -93,8 +93,7 @@ static void prv_handle_window_unload(Window* window) {
 }
 
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
-  menu_hack_set_colours(ctx, menu, cell_index);
-  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);  
+  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);
   uint16_t row = cell_index->row;
   #ifdef PBL_ROUND
   if (row == 0) {
@@ -109,27 +108,25 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   char state_buf[13];
   char number_buf[4];
   TrainTrip trip;
-  
+
   TrainTime *time = &s_times[row];
-  
+
   trip_get(time->trip, &trip);
   snprintf(number_buf, sizeof(number_buf), "%d", trip.trip_name);
   train_time_format_minutes(time->time, sizeof(time_buf), time_buf);
   train_time_format_state(time, sizeof(state_buf), state_buf);
-  
-  menu_hack_set_colours(ctx, menu, cell_index);
 
   #ifndef PBL_SDK_2
   const bool highlighted = menu_cell_layer_is_highlighted(cell_layer);
   #endif
-  
+
   GRect time_rect = GRect(0, -5, layer_get_bounds(cell_layer).size.w, 43);
   #ifdef PBL_DISP_SHAPE_ROUND
     if(highlighted) {
       time_rect.origin.y += 5;
     }
   #endif
-  graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), time_rect, 
+  graphics_draw_text(ctx, time_buf, fonts_get_system_font(FONT_KEY_BITHAM_34_MEDIUM_NUMBERS), time_rect,
                      GTextOverflowModeFill, PBL_IF_RECT_ELSE(GTextAlignmentLeft, GTextAlignmentCenter), NULL);
 
   GPoint circle_point = PBL_IF_RECT_ELSE(GPoint(135, 26), GPoint(105, 49));
@@ -142,7 +139,7 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
       graphics_context_set_fill_color(ctx, trip_get_colour(&trip));
     }
   #endif
-  
+
   #ifdef PBL_COLOR
     if(PBL_IF_RECT_ELSE(true, highlighted)) {
       if (gcolor_equal(trip_get_colour(&trip), COLOUR_MENU_HIGHLIGHT_BACKGROUND)) {
