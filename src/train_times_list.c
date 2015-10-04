@@ -57,7 +57,7 @@ static void initialise_ui(void) {
   text_layer_set_text(s_stop_name_layer, "Mountain View");
   text_layer_set_text_alignment(s_stop_name_layer, GTextAlignmentCenter);
   text_layer_set_font(s_stop_name_layer, s_res_gothic_24_bold);
-  #ifndef PBL_DISP_SHAPE_ROUND
+  #ifndef PBL_ROUND
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_stop_name_layer);
   #endif
   
@@ -93,7 +93,6 @@ static void prv_handle_window_unload(Window* window) {
 }
 
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
-  menu_hack_set_colours(ctx, menu, cell_index);
   graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);  
   uint16_t row = cell_index->row;
   #ifdef PBL_ROUND
@@ -116,15 +115,13 @@ static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex 
   snprintf(number_buf, sizeof(number_buf), "%d", trip.trip_name);
   train_time_format_minutes(time->time, sizeof(time_buf), time_buf);
   train_time_format_state(time, sizeof(state_buf), state_buf);
-  
-  menu_hack_set_colours(ctx, menu, cell_index);
 
   #ifndef PBL_SDK_2
   const bool highlighted = menu_cell_layer_is_highlighted(cell_layer);
   #endif
   
   GRect time_rect = GRect(0, -5, layer_get_bounds(cell_layer).size.w, 43);
-  #ifdef PBL_DISP_SHAPE_ROUND
+  #ifdef PBL_ROUND
     if(highlighted) {
       time_rect.origin.y += 5;
     }
@@ -190,8 +187,8 @@ static void prv_init_custom_ui(void) {
     .get_num_rows = prv_get_menu_rows,
     .select_click = prv_handle_menu_click,
     .get_cell_height = prv_get_cell_height,
-    .get_separator_height = menu_hack_borderless_cells,
   });
+  menu_set_colours(s_train_menu);
   stop_get(s_stop_id, &s_stop);
   text_layer_set_text(s_stop_name_layer, s_stop.name);
   text_layer_set_text(s_direction_layer, s_direction_names[s_direction]);

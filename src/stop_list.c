@@ -21,9 +21,9 @@ static void initialise_ui(void) {
   if(watch_info_get_firmware_version().major >= 3) {
     scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_menu), true);
   }
-#ifdef PBL_SDK_3
-  menu_layer_set_highlight_colors(s_menu, COLOUR_MENU_HIGHLIGHT_BACKGROUND, COLOUR_MENU_HIGHLIGHT_FOREGROUND);
-  menu_layer_set_normal_colors(s_menu, COLOUR_MENU_BACKGROUND, COLOUR_MENU_FOREGROUND);
+  menu_set_colours(s_menu);
+#ifdef PBL_ROUND
+  menu_layer_set_center_focused(s_menu, true);
 #endif
   menu_layer_set_click_config_onto_window(s_menu, s_window);
   layer_add_child(window_get_root_layer(s_window), (Layer *)s_menu);
@@ -102,7 +102,6 @@ void show_stop_list(void) {
     .draw_row = prv_draw_menu_row,
     .get_num_rows = prv_get_menu_rows,
     .select_click = prv_handle_menu_click,
-    .get_separator_height = menu_hack_borderless_cells,
   });
   
   window_set_window_handlers(s_window, (WindowHandlers) {
