@@ -93,7 +93,9 @@ static void prv_handle_window_unload(Window* window) {
 }
 
 static void prv_draw_menu_row(GContext *ctx, const Layer *cell_layer, MenuIndex *cell_index, void *menu) {
-  graphics_fill_rect(ctx, layer_get_bounds(cell_layer), 0, GCornerNone);  
+  #ifdef PBL_SDK_2
+  graphics_context_set_text_color(ctx, COLOUR_MENU_FOREGROUND);
+  #endif
   uint16_t row = cell_index->row;
   #ifdef PBL_ROUND
   if (row == 0) {

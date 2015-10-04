@@ -13,7 +13,7 @@ static MenuLayer *s_menu;
 
 static void initialise_ui(void) {
   s_window = window_create();
-  window_set_fullscreen(s_window, true);
+  window_set_fullscreen(s_window, PBL_IF_ROUND_ELSE(true, false));
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   // s_menu

@@ -33,7 +33,7 @@ static void initialise_ui(void) {
   
   s_res_gothic_24_bold = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
   // s_station_name
-  s_station_name = text_layer_create(PBL_IF_RECT_ELSE(GRect(0, -8, 144, 28), GRect(0, 14, 180, 28)));
+  s_station_name = text_layer_create(PBL_IF_RECT_ELSE(GRect(0, -8, 144, 28), GRect(0, 18, 180, 28)));
   text_layer_set_background_color(s_station_name, GColorClear);
   text_layer_set_text_color(s_station_name, COLOUR_HEADER_TEXT);
   text_layer_set_text(s_station_name, "Mountain View");
@@ -59,9 +59,9 @@ static void prv_draw_title_backing(Layer *layer, GContext *ctx) {
   graphics_fill_rect(ctx, layer_get_bounds(layer), 0, GCornerNone);
   graphics_context_set_fill_color(ctx, COLOUR_HEADER);
   #ifdef PBL_ROUND
-    graphics_fill_circle(ctx, GPoint(90, -30), 90);
+    graphics_fill_circle(ctx, GPoint(90, -26), 90);
     graphics_context_set_fill_color(ctx, GColorBlack);
-    graphics_fill_circle(ctx, GPoint(190, 90), 15);
+    graphics_fill_circle(ctx, GPoint(188, 90), 15);
     graphics_fill_rect(ctx, GRect(88, 77, 2, 85), 0, GCornerNone);
   #else
     graphics_fill_rect(ctx, GRect(0, 0, 144, 20), 0, GCornerNone);
