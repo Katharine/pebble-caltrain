@@ -13,18 +13,19 @@
     "resources": {
         "media": [
             {
-                "file": "data/calendar.dat",
-                "name": "DATA_CALENDAR",
-                "type": "raw"
-            },
-            {
-                "file": "data/stops.dat",
-                "name": "DATA_STOPS",
-                "type": "raw"
+                "file": "images/caltrain-icon.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
+                "type": "bitmap"
             },
             {
                 "file": "data/trips.dat",
                 "name": "DATA_TRIPS",
+                "type": "raw"
+            },
+            {
+                "file": "data/trip_index.dat",
+                "name": "INDEX_TRIP_STOPS",
                 "type": "raw"
             },
             {
@@ -33,19 +34,18 @@
                 "type": "raw"
             },
             {
+                "file": "data/stops.dat",
+                "name": "DATA_STOPS",
+                "type": "raw"
+            },
+            {
                 "file": "data/stop_index.dat",
                 "name": "INDEX_STOP_TIMES",
                 "type": "raw"
             },
             {
-                "file": "images/caltrain-icon.png",
-                "menuIcon": true,
-                "name": "IMAGE_MENU_ICON",
-                "type": "png"
-            },
-            {
-                "file": "data/trip_index.dat",
-                "name": "INDEX_TRIP_STOPS",
+                "file": "data/calendar.dat",
+                "name": "DATA_CALENDAR",
                 "type": "raw"
             }
         ]

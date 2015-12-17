@@ -51,6 +51,7 @@ static void destroy_ui(void) {
   window_destroy(s_window);
   text_layer_destroy(s_station_name);
   inverter_layer_destroy(s_inverterlayer_1);
+  s_window = NULL;
 }
 // END AUTO-GENERATED UI CODE
 

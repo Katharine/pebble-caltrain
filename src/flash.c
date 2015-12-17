@@ -22,6 +22,8 @@ static void prv_reload_cache(ResHandle h, uint32_t start_offset) {
   if(res_size <= start_offset) {
     APP_LOG(APP_LOG_LEVEL_ERROR, "Request for illegal offset %d (of %d).", (int)s_offset, (int)res_size);
     s_length = 0;
+    char foo[20] = "hello there";
+    strtok(foo, " ");
     return;
   }
   size_t size = res_size - start_offset;
