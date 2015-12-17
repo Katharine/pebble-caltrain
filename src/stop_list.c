@@ -17,7 +17,11 @@ static void initialise_ui(void) {
   window_set_background_color(s_window, COLOUR_WINDOW);
   
   // s_menu
-  s_menu = menu_layer_create(layer_get_bounds(window_get_root_layer(s_window)));
+  GRect menu_bounds = layer_get_bounds(window_get_root_layer(s_window));
+#ifdef PBL_ROUND
+  menu_bounds = grect_inset(menu_bounds, GEdgeInsets(STATUS_BAR_LAYER_HEIGHT, 0));
+#endif
+  s_menu = menu_layer_create(menu_bounds);
   if(watch_info_get_firmware_version().major >= 3) {
     scroll_layer_set_shadow_hidden(menu_layer_get_scroll_layer(s_menu), true);
   }
@@ -95,6 +99,15 @@ void show_nearest_stop(int32_t lon, int32_t lat) {
   select_list_select_stop(best_id, true);
 }
 
+int16_t prv_menu_round_cell_height(struct MenuLayer *menu_layer, MenuIndex *cell_index,
+                             void *callback_context) {
+  if (menu_layer_get_selected_index(menu_layer).row == cell_index->row) {
+    return MENU_CELL_ROUND_FOCUSED_SHORT_CELL_HEIGHT;
+  } else {
+    return MENU_CELL_ROUND_UNFOCUSED_TALL_CELL_HEIGHT;
+  }
+}
+
 void show_stop_list(void) {
   initialise_ui();
   
@@ -102,6 +115,9 @@ void show_stop_list(void) {
     .draw_row = prv_draw_menu_row,
     .get_num_rows = prv_get_menu_rows,
     .select_click = prv_handle_menu_click,
+#ifdef PBL_ROUND
+    .get_cell_height = prv_menu_round_cell_height,
+#endif
   });
   
   window_set_window_handlers(s_window, (WindowHandlers) {
