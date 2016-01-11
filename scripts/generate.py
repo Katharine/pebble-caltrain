@@ -39,7 +39,7 @@ def generate_files(source_dir, target_dir):
         cal.append({
             'id': i,
             'start': time.mktime(time.strptime(x['start_date'], '%Y%m%d')),
-            'end': time.mktime(time.strptime(x['end_date'], '%Y%m%d')),
+            'end': time.mktime(time.strptime(str(int(x['end_date']) + 1) + '02', '%Y%m%d%H')), # Hack to make the end the right time
             'days': (
                 (int(x['monday'])    << 0) |
                 (int(x['tuesday'])   << 1) |
