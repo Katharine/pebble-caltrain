@@ -9,6 +9,13 @@ def generate_files(source_dir, target_dir):
     stops_txt = [x for x in csv.DictReader(open("%s/stops.txt" % source_dir, 'rb')) if x['location_type'] == '0']
     print "%d stops" % len(stops_txt)
 
+    name_replacements = (
+        ('Caltrain', ''),
+        ('Station', ''),
+        ('Mt View', 'Mountain View'),
+        ('So. San Francisco', 'South SF'),
+    )
+
     stop_parent_map = {}
     stop_map = {}
     stops = []
@@ -18,8 +25,11 @@ def generate_files(source_dir, target_dir):
             continue
         stop_map[int(s['stop_code'])] = len(stops)
         stop_parent_map[s['parent_station']] = len(stops)
+        for replacement in name_replacements:
+            s['stop_name'] = s['stop_name'].replace(*replacement)
+        s['stop_name'] = s['stop_name'].rstrip()
         stops.append({
-            'name': s['stop_name'].replace('Caltrain', '').replace('Station', '').replace("Mt View", "Mountain View").rstrip(),
+            'name': s['stop_name'],
             'zone': int(s['zone_id']) if s['zone_id'] != '' else 0,
             'lat': float(s['stop_lat']),
             'lon': float(s['stop_lon'])
