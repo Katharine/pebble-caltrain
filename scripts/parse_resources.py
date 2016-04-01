@@ -2,6 +2,7 @@ from __future__ import division
 import struct
 import time
 import os
+import datetime
 
 def parse_resources(resources_dir):
 	stops_dat = open(os.path.join(resources_dir, 'stops.dat'), 'rb').read()
@@ -29,7 +30,8 @@ def parse_resources(resources_dir):
 	for counter in range(calendar_len):
 		start, end, days = struct.unpack_from('<IIB', calendar_dat, header_len + counter * record_len)
 		start = time.strftime('%Y-%m-%d', time.localtime(start))
-		end = time.strftime('%Y-%m-%d', time.localtime(end))
+		end = datetime.datetime.fromtimestamp(end) - datetime.timedelta(1, hours=2)
+		end = time.strftime('%Y-%m-%d', end.timetuple())
 		days_list = []
 		# Simplest way to do this, not pretty...
 		if days & (1 << 0):
