@@ -3,6 +3,7 @@ __author__ = 'katharine'
 import csv
 import struct
 import time
+import datetime
 
 
 def generate_files(source_dir, target_dir):
@@ -36,10 +37,11 @@ def generate_files(source_dir, target_dir):
     cal_map = {}
     for i, x in enumerate(calendar_txt):
         cal_map[x['service_id']] = i
+        end_time = datetime.datetime.strptime(x['end_date'], '%Y%m%d') + datetime.timedelta(1, hours=2)
         cal.append({
             'id': i,
             'start': time.mktime(time.strptime(x['start_date'], '%Y%m%d')),
-            'end': time.mktime(time.strptime(str(int(x['end_date']) + 1) + '02', '%Y%m%d%H')), # Hack to make the end the right time
+            'end': time.mktime(end_time.timetuple()),
             'days': (
                 (int(x['monday'])    << 0) |
                 (int(x['tuesday'])   << 1) |
