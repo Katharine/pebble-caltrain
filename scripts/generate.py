@@ -3,11 +3,19 @@ __author__ = 'katharine'
 import csv
 import struct
 import time
+import datetime
 
 
 def generate_files(source_dir, target_dir):
     stops_txt = [x for x in csv.DictReader(open("%s/stops.txt" % source_dir, 'rb')) if x['location_type'] == '0']
     print "%d stops" % len(stops_txt)
+
+    name_replacements = (
+        ('Caltrain', ''),
+        ('Station', ''),
+        ('Mt View', 'Mountain View'),
+        ('So. San Francisco', 'South SF'),
+    )
 
     stop_parent_map = {}
     stop_map = {}
@@ -18,8 +26,11 @@ def generate_files(source_dir, target_dir):
             continue
         stop_map[int(s['stop_code'])] = len(stops)
         stop_parent_map[s['parent_station']] = len(stops)
+        for replacement in name_replacements:
+            s['stop_name'] = s['stop_name'].replace(*replacement)
+        s['stop_name'] = s['stop_name'].rstrip()
         stops.append({
-            'name': s['stop_name'].replace('Caltrain', '').replace('Station', '').replace("Mt View", "Mountain View").rstrip(),
+            'name': s['stop_name'],
             'zone': int(s['zone_id']) if s['zone_id'] != '' else 0,
             'lat': float(s['stop_lat']),
             'lon': float(s['stop_lon'])
@@ -36,10 +47,11 @@ def generate_files(source_dir, target_dir):
     cal_map = {}
     for i, x in enumerate(calendar_txt):
         cal_map[x['service_id']] = i
+        end_time = datetime.datetime.strptime(x['end_date'], '%Y%m%d') + datetime.timedelta(1, hours=2)
         cal.append({
             'id': i,
             'start': time.mktime(time.strptime(x['start_date'], '%Y%m%d')),
-            'end': time.mktime(time.strptime(x['end_date'], '%Y%m%d')),
+            'end': time.mktime(end_time.timetuple()),
             'days': (
                 (int(x['monday'])    << 0) |
                 (int(x['tuesday'])   << 1) |
@@ -100,8 +112,8 @@ def generate_files(source_dir, target_dir):
         for t in tm:
             f.write(struct.pack('<HHBB', t['trip'], t['time'], t['stop'], t['sequence']))
 
-    stop_times = {stop: sorted([i for i, x in enumerate(tm) if x['stop'] == stop], key=lambda t: tm[t]['time']) for stop, s in enumerate(stops)}
-    lengths = [len(x) for x in stop_times.values()]
+    stop_times = [sorted([i for i, x in enumerate(tm) if x['stop'] == stop], key=lambda t: tm[t]['time']) for stop, s in enumerate(stops)]
+    lengths = [len(x) for x in stop_times]
 
     with open('%s/stop_index.dat' % target_dir, 'wb') as f:
         f.write(struct.pack('<B', len(lengths)))
@@ -110,7 +122,7 @@ def generate_files(source_dir, target_dir):
             f.write(struct.pack('<HH', counter, l))
             counter += l*2
 
-        for s in stop_times.values():
+        for s in stop_times:
             for x in s:
                 f.write(struct.pack('<H', x))
 
