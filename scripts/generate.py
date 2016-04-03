@@ -75,14 +75,10 @@ def generate_files(source_dir, target_dir):
 
     # These shouldn't be hardcoded, and should instead be inferred from routes.txt.
     route_map = {
-        "Bu-120": 0,
-        "Li-120": 1,
-        "Lo-120": 2,
-        "TaSj-120": 3,
-        "Bu-121": 0,
-        "Li-121": 1,
-        "Lo-121": 2,
-        "TaSj-121": 3,
+        "BABY BULLET": 0,
+        "LIMITED": 1,
+        "LOCAL": 2,
+        "SHUTTLE": 3,
     }
 
     for i, trip in enumerate(trips_txt):
