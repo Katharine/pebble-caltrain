@@ -6,8 +6,8 @@
 
 // Indicates which direction a train is going in.
 typedef enum {
-  TrainDirectionSouthbound,
   TrainDirectionNorthbound,
+  TrainDirectionSouthbound,
 } TrainDirection;
 
 // Describes a physical station.

@@ -70,7 +70,7 @@ def parse_resources(resources_dir):
 	trips = []
 	for counter in range(trips_len):
 		name, direction, route, service = struct.unpack_from('<HBBB', trips_dat, header_len + counter * record_len)
-		direction = 'Northbound' if direction else 'Southbound'
+		direction = 'Southbound' if direction else 'Northbound'
 		route = route_map[route]
 		service = calendar[service]
 		trips.append({
