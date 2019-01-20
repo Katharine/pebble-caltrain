@@ -15,20 +15,26 @@ def generate_files(source_dir, target_dir):
         ('Station', ''),
         ('Mt View', 'Mountain View'),
         ('So. San Francisco', 'South SF'),
+        ('South San Francisco', 'South SF'),
     )
 
     stop_parent_map = {}
+    stop_name_map = {}
     stop_map = {}
     stops = []
     for s in stops_txt:
-        if s['parent_station'] in stop_parent_map:
+        if s['parent_station'] != '' and s['parent_station'] in stop_parent_map:
             stop_map[int(s['stop_code'])] = stop_parent_map[s['parent_station']]
             continue
-        stop_map[int(s['stop_code'])] = len(stops)
-        stop_parent_map[s['parent_station']] = len(stops)
         for replacement in name_replacements:
             s['stop_name'] = s['stop_name'].replace(*replacement)
         s['stop_name'] = s['stop_name'].rstrip()
+        if s['stop_name'] in stop_name_map:
+            stop_map[int(s['stop_code'])] = stop_name_map[s['stop_name']]
+            continue
+        stop_map[int(s['stop_code'])] = len(stops)
+        stop_parent_map[s['parent_station']] = len(stops)
+        stop_name_map[s['stop_name']] = len(stops)
         stops.append({
             'name': s['stop_name'],
             'zone': int(s['zone_id']) if s['zone_id'] != '' else 0,
@@ -46,10 +52,10 @@ def generate_files(source_dir, target_dir):
     cal = []
     cal_map = {}
     for i, x in enumerate(calendar_txt):
-        cal_map[x['service_id']] = i
+        cal_map[x['service_id']] = len(cal)
         end_time = datetime.datetime.strptime(x['end_date'], '%Y%m%d') + datetime.timedelta(1, hours=2)
         cal.append({
-            'id': i,
+            'id': cal_map[x['service_id']],
             'start': time.mktime(time.strptime(x['start_date'], '%Y%m%d')),
             'end': time.mktime(end_time.timetuple()),
             'days': (
@@ -61,6 +67,23 @@ def generate_files(source_dir, target_dir):
                 (int(x['saturday'])  << 5) |
                 (int(x['sunday'])    << 6)
             )
+        })
+
+    calendar_dates_txt = list(csv.DictReader(open("%s/calendar_dates.txt" % source_dir, 'rb')))
+    for i, x in enumerate(calendar_dates_txt):
+        if x['service_id'] in cal_map:
+            # XXX: Would be nice to find a way to mark special dates.  But
+            # we can't, right now.  Oh well.
+            continue
+
+        cal_map[x['service_id']] = len(cal)
+        start_time = datetime.datetime.strptime(x['date'], '%Y%m%d')
+        end_time = start_time + datetime.timedelta(1, hours=2)
+        cal.append({
+            'id': cal_map[x['service_id']],
+            'start': time.mktime(start_time.timetuple()),
+            'end': time.mktime(end_time.timetuple()),
+            'days': 0x7F,
         })
 
     with open('%s/calendar.dat' % target_dir, 'wb') as f:
@@ -79,9 +102,22 @@ def generate_files(source_dir, target_dir):
         "LIMITED": 1,
         "LOCAL": 2,
         "SHUTTLE": 3,
+        "Bu-130": 0,
+        "Li-130": 1,
+        "Lo-130": 2,
+        "TaSj-130": 3,
+        "Sp-130": 2, # XXX: Special Event Extra Service
     }
 
+    short_name_replacements = (
+      ('Tamien SJ shuttle', ''),
+      ('S', ''),
+      ('shuttle', ''),
+    )
+    
     for i, trip in enumerate(trips_txt):
+        for replacement in short_name_replacements:
+            trip['trip_short_name'] = trip['trip_short_name'].replace(*replacement)
         tr.append({
             'direction': int(not int(trip['direction_id'])),  # We picked opposing values for north/south.
             'route': route_map[trip['route_id']],
@@ -145,4 +181,5 @@ def generate_files(source_dir, target_dir):
 
 
 if __name__ == "__main__":
-    generate_files("/Users/katharine/Downloads/GTFS Caltrain Devs/", "/Users/katharine/projects/pebble-caltrain/resources/data/")
+    import sys
+    generate_files(sys.argv[1], sys.argv[2])
