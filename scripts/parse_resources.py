@@ -134,11 +134,17 @@ def parse_resources(resources_dir):
 			'index': trip_time_list
 		})
 
-	return stops_len, stops, calendar_len, calendar, trips_len, trips, times_len, times, stop_index_len, stop_index, trip_index_len, trip_index
+	return { 'stops': stops,
+	         'calendar': calendar,
+	         'trips': trips,
+	         'times': times, 
+	         'stop_index': stop_index, 
+	         'trip_index': trip_index }
 
 if __name__ == '__main__':
 	import sys
+	import json
 	if len(sys.argv) > 1:
-		print(repr(parse_resources(sys.argv[1])))
+		print(json.dumps(parse_resources(sys.argv[1])))
 	else:
 		print('Please provide the path to the resources directory, eg ~/git/pebble-caltrain/resources/data')
